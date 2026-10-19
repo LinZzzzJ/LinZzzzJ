@@ -1,0 +1,52 @@
+name: Update public profile visuals
+
+on:
+  schedule:
+    - cron: '17 3 * * *'
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/profile.yml'
+      - 'scripts/**'
+      - 'package.json'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: public-profile-visuals
+  cancel-in-progress: false
+
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      GITHUB_LOGIN: LinZzzzJ
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
+        with:
+          node-version: '24'
+          package-manager-cache: false
+      - name: Test public-data guards and atomic asset publishing
+        run: npm test
+      - name: Collect public-only statistics and generate cards
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: node scripts/profile.mjs collect
+      - name: Generate contribution snake
+        uses: Platane/snk/svg-only@d8f6715049803e982ee5ff501b6b9b7d5deeb09b # v3
+        with:
+          github_user_name: ${{ env.GITHUB_LOGIN }}
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          outputs: |
+            dist/snake.svg?color_snake=%237c3aed
+            dist/snake-dark.svg?palette=github-dark&color_snake=%23a78bfa
+      - name: Recheck public-only visibility before publishing
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: node scripts/profile.mjs verify
+      - name: Atomically publish the complete SVG set
+        run: node scripts/publish-assets.mjs
