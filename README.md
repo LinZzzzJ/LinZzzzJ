@@ -11,56 +11,17 @@
 
 #### 🔬 Research & Engineering
 
-从探测器与板级硬件，到嵌入式系统、科学计算与应用软件。
-
-<table>
-  <tr>
-    <td width="50%" valign="top">
-      <strong>Detector Electronics</strong><br />
-      <sub>核电子学 · 粒子探测</sub>
-      <p>围绕探测器信号的采集、处理与分析，关注高速信号链、测量方法和实验验证。</p>
-      <code>Nuclear Electronics</code> <code>Particle Detection</code>
-    </td>
-    <td width="50%" valign="top">
-      <strong>Embedded &amp; FPGA</strong><br />
-      <sub>嵌入式 · 可编程逻辑</sub>
-      <p>ARM 嵌入式系统、FPGA 逻辑与 Linux 开发，关注软硬件协同和系统联调。</p>
-      <code>ARM</code> <code>FPGA</code> <code>Linux</code>
-    </td>
-  </tr>
-  <tr>
-    <td width="50%" valign="top">
-      <strong>Signal &amp; Power Engineering</strong><br />
-      <sub>高速信号 · 信号完整性 · 电源设计</sub>
-      <p>从信号传输到电源设计，结合板级调试与测量，分析问题并验证设计。</p>
-      <code>High-speed Signals</code> <code>SI</code> <code>Power Design</code>
-    </td>
-    <td width="50%" valign="top">
-      <strong>Scientific &amp; Application Software</strong><br />
-      <sub>科学计算 · 可视化 · 应用开发</sub>
-      <p>用 MATLAB 构建实验分析工具，以 Python 和 Web 技术开发数据应用与交互界面。</p>
-      <code>MATLAB</code> <code>Python</code> <code>GUI</code>
-    </td>
-  </tr>
-</table>
+- **Detector Electronics** — 核电子学 · 粒子探测 · 信号采集
+- **Embedded & FPGA** — ARM · FPGA · Linux
+- **Signal & Power** — 高速信号 · 信号完整性 · 电源设计
+- **Scientific Software** — 科学计算 · 数据可视化 · 应用开发
 
 ---
 
 #### 🚀 Selected Work
 
-**[FitTrack · 轻衡](https://github.com/LinZzzzJ/FitTrack)** · Local-first Fitness Journal
-
-`Python` `FastAPI` `Svelte` `TypeScript` `SQLite` `ECharts`
-
-将饮食、训练与身体变化组织成可持续记录的数据应用，结合 AI 辅助与趋势图表。支持 Windows 便携运行、个人 API Key 和本地数据管理。
-
-**Detector Data Workflows** · Scientific Computing & Instrumentation
-
-`MATLAB` `HDF5` `Signal Processing` `Data Visualization`
-
-围绕探测器采样数据，构建校正、事件处理、脉冲拟合与性能表征流程；通过可配置 GUI 与命令接口支持实验分析。
-
-<sub>部分科研工作保持私有，仅介绍研究方向；公开项目详情见对应仓库。</sub>
+- **[FitTrack · 轻衡](https://github.com/LinZzzzJ/FitTrack)** `Python` `FastAPI` `Svelte` `SQLite` — 本地健身日志，AI 辅助与趋势分析
+- **Detector Data Workflows** `MATLAB` `HDF5` — 探测器数据校正、脉冲拟合与性能表征
 
 ---
 
