@@ -6,6 +6,8 @@ This public repository contains only the profile introduction, original toolkit 
 
 Edit `README.md` to change the introduction. Keep the existing light/dark `<picture>` elements so both GitHub themes work. With Node.js 24 installed, run `npm test` before pushing script changes. The scripts use only built-in Node.js modules; no package installation is required.
 
+The README separates engineering interests, selected work and the toolkit. FitTrack is a public project; its listed software stack is checked against its public README, `pyproject.toml`, frontend `package.json` and GitHub language data. Embedded and hardware topics reflect the owner's stated engineering interests. The local SVG tiles are original, consistent illustrations of those technologies, not official logos or proficiency ratings. Keep private research descriptions general and do not add private repository links or experimental information.
+
 ## Automatic updates
 
 The **Update public profile visuals** workflow runs daily at **03:17 UTC / 11:17 Asia/Shanghai**, and can be run from **Actions → Update public profile visuals → Run workflow**. GitHub schedules may run late or be paused after prolonged repository inactivity; use the manual trigger to check or resume updates.
