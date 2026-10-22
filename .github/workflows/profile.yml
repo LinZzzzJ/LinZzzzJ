@@ -30,9 +30,9 @@ jobs:
         with:
           node-version: '24'
           package-manager-cache: false
-      - name: Test public-data guards and atomic asset publishing
+      - name: Test activity-data guards and atomic asset publishing
         run: npm test
-      - name: Collect public-only statistics and generate cards
+      - name: Collect GitHub activity statistics and generate cards
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: node scripts/profile.mjs collect
@@ -44,7 +44,7 @@ jobs:
           outputs: |
             dist/snake.svg?color_snake=%237c3aed
             dist/snake-dark.svg?palette=github-dark&color_snake=%23a78bfa
-      - name: Recheck public-only visibility before publishing
+      - name: Recheck activity visibility before publishing
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: node scripts/profile.mjs verify

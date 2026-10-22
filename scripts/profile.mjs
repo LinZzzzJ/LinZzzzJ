@@ -21,7 +21,7 @@ const QUERY = `query PublicActivity($login: String!, $from: DateTime!, $to: Date
 }`;
 
 const number = (value, name) => {
-  if (!Number.isSafeInteger(value) || value < 0) throw new Error(`Invalid public count: ${name}`);
+  if (!Number.isSafeInteger(value) || value < 0) throw new Error(`Invalid activity count: ${name}`);
   return value;
 };
 
@@ -31,9 +31,7 @@ export function validateActivity(body, login = LOGIN) {
   if (!user || user.login.toLowerCase() !== login.toLowerCase()) throw new Error('Unexpected GitHub account.');
   const collection = user.contributionsCollection;
   if (!collection) throw new Error('Missing contribution collection.');
-  if (number(collection.restrictedContributionsCount, 'restrictedContributionsCount') !== 0) {
-    throw new Error('PRIVATE_CONTRIBUTIONS_VISIBLE: turn OFF profile → Contribution settings → Private contributions, then rerun. No images were published.');
-  }
+  const restrictedContributions = number(collection.restrictedContributionsCount, 'restrictedContributionsCount');
   const calendar = collection.contributionCalendar;
   if (!Array.isArray(calendar?.weeks)) throw new Error('Missing public contribution calendar.');
   const seen = new Set();
@@ -48,11 +46,13 @@ export function validateActivity(body, login = LOGIN) {
   });
   const contributions = number(calendar.totalContributions, 'totalContributions');
   if (days.reduce((sum, day) => sum + day.count, 0) !== contributions) throw new Error('Calendar totals do not match daily public counts.');
+  if (restrictedContributions > contributions) throw new Error('Restricted contributions exceed calendar total.');
   return {
     commits: number(collection.totalCommitContributions, 'commits'),
     prs: number(collection.totalPullRequestContributions, 'pull requests'),
     issues: number(collection.totalIssueContributions, 'issues'),
     contributions,
+    restrictedContributions,
     days,
     activeDays: days.filter(day => day.count > 0).length
   };
@@ -77,7 +77,7 @@ export async function collectPublicData({ token, login = LOGIN, now = new Date()
       if (response.status < 500 || attempt === 2) break;
       await new Promise(accept => setTimeout(accept, 1000 * (attempt + 1)));
     }
-    if (!response.ok) throw new Error(`GitHub public-data request failed (HTTP ${response.status}).`);
+    if (!response.ok) throw new Error(`GitHub activity-data request failed (HTTP ${response.status}).`);
     return response.json();
   }
   const body = await request('/graphql', { query: QUERY, variables: { login, ...period } });
@@ -103,7 +103,7 @@ export function renderStats(data, dark = false) {
   const colors = dark
     ? { background: '#0d1117', border: '#30363d', text: '#c9d1d9', muted: '#8b949e', blue: '#79c0ff', ring: '#1f6feb' }
     : { background: '#ffffff', border: '#d0d7de', text: '#434d58', muted: '#6e7781', blue: '#2f80ed', ring: '#cfe1ff' };
-  const rows = [['Public Stars', data.stars], ['Public Commits', data.commits], ['Public PRs', data.prs], ['Public Issues', data.issues], ['Public Contributions', data.contributions]];
+  const rows = [['Public Stars', data.stars], ['Visible Commits', data.commits], ['Visible PRs', data.prs], ['Visible Issues', data.issues], ['All Contributions', data.contributions]];
   for (const [label, value] of rows) number(value, label);
   const totalDays = data.days.length;
   const activeDays = number(data.activeDays, 'activeDays');
@@ -112,18 +112,18 @@ export function renderStats(data, dark = false) {
   const fraction = totalDays ? activeDays / totalDays : 0;
   const updated = new Date(data.updatedAt).toLocaleString('sv-SE', { timeZone: 'Asia/Shanghai', hour12: false }).slice(0, 16);
   return `<svg xmlns="http://www.w3.org/2000/svg" width="450" height="224" viewBox="0 0 450 224" role="img" aria-labelledby="title desc">
-  <title id="title">${escapeXml(data.displayName)}'s GitHub Stats — public activity</title>
-  <desc id="desc">Stars: public owned non-fork repositories. Activity: trailing twelve months. Active public days: ${activeDays}/${totalDays}. No private activity.</desc>
+  <title id="title">${escapeXml(data.displayName)}'s GitHub Stats — GitHub activity</title>
+  <desc id="desc">Stars: public owned non-fork repositories. Activity: trailing twelve months. Active GitHub days: ${activeDays}/${totalDays}. Private activity is shown only as an anonymous aggregate.</desc>
   <rect x=".5" y=".5" width="449" height="223" rx="6" fill="${colors.background}" stroke="${colors.border}"/>
   <g font-family="-apple-system,BlinkMacSystemFont,Segoe UI,Arial,sans-serif">
     <text x="24" y="33" fill="${colors.blue}" font-size="18" font-weight="600">${escapeXml(data.displayName)}'s GitHub Stats</text>
-    <text x="24" y="53" fill="${colors.muted}" font-size="10">Public activity · last 12 months</text>
+    <text x="24" y="53" fill="${colors.muted}" font-size="10">GitHub activity · last 12 months</text>
     ${rows.map(([label, value], i) => `<g transform="translate(24 ${78 + 23 * i})"><circle cx="5" cy="-4" r="3" fill="${colors.blue}"/><text x="20" fill="${colors.text}" font-size="12" font-weight="600">${label}:</text><text x="239" text-anchor="end" fill="${colors.text}" font-size="12" font-weight="600">${new Intl.NumberFormat('en-US').format(value)}</text></g>`).join('\n    ')}
     <g transform="translate(359 117)">
       <circle r="${radius}" fill="none" stroke="${colors.ring}" stroke-width="6"/>
       <circle r="${radius}" fill="none" stroke="${colors.blue}" stroke-width="6" stroke-linecap="round" stroke-dasharray="${fraction * circumference} ${circumference}" transform="rotate(-90)"/>
       <text y="-2" fill="${colors.text}" text-anchor="middle" font-size="23" font-weight="700">${activeDays}<tspan font-size="11" font-weight="400">d</tspan></text>
-      <text y="16" fill="${colors.muted}" text-anchor="middle" font-size="9">active public days</text>
+      <text y="16" fill="${colors.muted}" text-anchor="middle" font-size="9">active GitHub days</text>
     </g>
     <text x="24" y="202" fill="${colors.muted}" font-size="9">Stars: current · Activity: ${escapeXml(data.window.from.slice(0, 10))}–${escapeXml(data.window.to.slice(0, 10))}</text>
     <text x="24" y="216" fill="${colors.muted}" font-size="9">Updated ${escapeXml(updated)} (UTC+8)</text>
@@ -145,11 +145,11 @@ async function main() {
     await writeFile(join(dist, 'stats-light.svg'), renderStats(data));
     await writeFile(join(dist, 'stats-dark.svg'), renderStats(data, true));
     await writeFile(snapshot, JSON.stringify(data, null, 2));
-    console.log(`Public-only snapshot collected: ${data.contributions} contributions, ${data.activeDays} active days.`);
+    console.log(`GitHub activity snapshot collected: ${data.contributions} contributions, ${data.activeDays} active days (${data.restrictedContributions} anonymous private).`);
   } else if (command === 'verify') {
     const saved = JSON.parse(await readFile(snapshot, 'utf8'));
     await collectPublicData({ ...options, window: saved.window });
-    console.log('Public-only visibility verified again; complete assets may be published.');
+    console.log('GitHub activity visibility verified again; complete assets may be published.');
   } else {
     throw new Error('Usage: node scripts/profile.mjs collect|verify');
   }

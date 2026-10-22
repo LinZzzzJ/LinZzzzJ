@@ -15,16 +15,17 @@ const collection = (counts = [0, 2, 3]) => ({ data: { user: { login: LOGIN, cont
   }
 } } } });
 
-test('anonymous private contributions fail before any repository query', async () => {
-  const body = collection(); body.data.user.contributionsCollection.restrictedContributionsCount = 1;
-  let calls = 0;
-  await assert.rejects(collectPublicData({ token: 'fixture', fetchImpl: async () => {
-    calls++; return { ok: true, status: 200, json: async () => body };
-  } }), /PRIVATE_CONTRIBUTIONS_VISIBLE/);
-  assert.equal(calls, 1);
+test('anonymous private contributions are accepted as aggregate activity', () => {
+  const body = collection();
+  body.data.user.contributionsCollection.restrictedContributionsCount = 1;
+  const activity = validateActivity(body);
+  assert.equal(activity.restrictedContributions, 1);
+  assert.equal(activity.contributions, 5);
+  body.data.user.contributionsCollection.restrictedContributionsCount = 6;
+  assert.throws(() => validateActivity(body), /exceed calendar total/);
 });
 
-test('public calendar validates totals, dates, nonnegative counts and API errors', () => {
+test('contribution calendar validates totals, dates, nonnegative counts and API errors', () => {
   assert.equal(validateActivity(collection()).activeDays, 2);
   const zero = validateActivity(collection([0, 0])); assert.equal(zero.contributions, 0);
   assert.throws(() => validateActivity({ errors: [{ message: 'fixture error' }] }), /fixture error/);
@@ -52,10 +53,10 @@ test('cards use real counts, a real active-day ring, escaped text and both theme
     updatedAt: '2026-10-20T03:17:00Z', window: { from: '2025-10-20', to: '2026-10-20' } };
   const light = renderStats(data); const dark = renderStats(data, true);
   assert.match(light, /&lt;Lin &amp; J&gt;/); assert.doesNotMatch(light, /<Lin/);
-  assert.match(light, />17<\/text>/); assert.match(light, /Active public days: 2\/3/);
+  assert.match(light, />17<\/text>/); assert.match(light, /Active GitHub days: 2\/3/);
   assert.match(light, /2026-10-20 11:17/); assert.match(light, /#ffffff/); assert.match(dark, /#0d1117/);
   const zero = { ...data, ...validateActivity(collection([0, 0])) };
-  assert.match(renderStats(zero), /Active public days: 0\/2/);
+  assert.match(renderStats(zero), /Active GitHub days: 0\/2/);
 });
 
 test('atomic Git publication preserves main and old assets on failure; identical files create no commit', async () => {

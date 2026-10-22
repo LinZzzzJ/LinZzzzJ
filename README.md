@@ -74,12 +74,12 @@
 
 ---
 
-#### 🌱 Public Contributions
+#### 🌱 GitHub Contributions
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/LinZzzzJ/LinZzzzJ/output/assets/snake-dark.svg" />
   <source media="(prefers-color-scheme: light)" srcset="https://raw.githubusercontent.com/LinZzzzJ/LinZzzzJ/output/assets/snake.svg" />
-  <img width="100%" src="https://raw.githubusercontent.com/LinZzzzJ/LinZzzzJ/output/assets/snake.svg" alt="Animated snake following the public contribution calendar" />
+  <img width="100%" src="https://raw.githubusercontent.com/LinZzzzJ/LinZzzzJ/output/assets/snake.svg" alt="Animated snake following the GitHub contribution calendar" />
 </picture>
 
-<sub>Only public activity · Stats and animation update daily · [How this page updates](MAINTENANCE.md)</sub>
+<sub>Private contributions are included as anonymous counts · Stats and animation update daily · [How this page updates](MAINTENANCE.md)</sub>

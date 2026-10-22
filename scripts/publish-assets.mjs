@@ -46,7 +46,7 @@ export async function publishAssets({ cwd = process.cwd(), dist = resolve(cwd, '
     }
     const commit = git(['commit-tree', tree, ...(parent ? ['-p', parent] : []), '-m', 'chore: update public profile visuals']);
     git(['push', 'origin', `${commit}:refs/heads/output`]);
-    console.log('Published four public-only SVGs atomically to output.');
+    console.log('Published four GitHub activity SVGs atomically to output.');
     return { changed: true, commit };
   } finally {
     await rm(temp, { recursive: true, force: true });

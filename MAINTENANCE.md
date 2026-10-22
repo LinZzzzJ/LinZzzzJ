@@ -14,15 +14,17 @@ The **Update public profile visuals** workflow runs daily at **03:17 UTC / 11:17
 
 The workflow generates two statistics cards and two [Platane/snk](https://github.com/Platane/snk) contribution-snake SVGs. All four assets are published together to the `output` branch. Bot-generated images do not modify the hand-written README. Unchanged assets do not create a new commit. Failed generation leaves the last complete asset set intact.
 
-## Public data only
+## Contribution data and privacy
 
 - **Stars** sums current stars on public, non-fork repositories owned by this account.
-- **Commits, PRs, Issues and Contributions** use GitHub's public contribution records for the trailing twelve-month period displayed on the card. Contributions include GitHub-counted activities beyond commits.
-- The ring shows active public-contribution days divided by the number of days returned in that period. It is not a developer grade.
+- **Commits, PRs, Issues and Contributions** use GitHub's contribution records for the trailing twelve-month period displayed on the card. Contributions include GitHub-counted activities beyond commits.
+- If private contributions are enabled on the profile, GitHub provides their counts anonymously. The calendar and total contribution count include those private activities, while private repository names and details remain unavailable.
+- The card's commit, PR and issue rows are visible activity counts; the total contribution row and calendar include the anonymous private contribution counts.
+- The ring shows active GitHub-contribution days divided by the number of days returned in that period. It is not a developer grade.
 - No personal access token or private-repository credential is configured in this repository. The workflow uses its own `GITHUB_TOKEN`.
-- If GitHub returns anonymous private contributions, the workflow fails before publishing. Open the profile's **Contribution settings → Private contributions**, turn that option **off**, then run the workflow again. The private-repository names and their activity counts must not be published here.
+- Repository Star collection still rejects private repository metadata. Only public, non-fork repositories are included in the Star total.
 
-An empty public history is valid and displays zero activity. Uploading a private project does not fill this public calendar. Commit dates are never synthesized or backdated.
+An empty contribution history is valid and displays zero activity. Commit dates are never synthesized or backdated.
 
 ## Generated files
 
