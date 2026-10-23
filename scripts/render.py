@@ -40,11 +40,15 @@ PROJECTS = [
 
 # Compact hardware-focused skills; application dependencies stay with the project.
 STACK = [
-    ("Languages", [("MATLAB", "#e16737"), ("Python", "#3572A5")]),
-    ("Signal integrity", [("SI Simulation", "signal"), ("High-Speed Signals", "signal")]),
-    ("Power integrity", [("PI Simulation", "power"), ("Power Design", "power")]),
+    ("Languages", [("MATLAB", "#e16737"), ("Python", "#3572A5"),
+                   ("TypeScript", "#3178c6"), ("JavaScript", "#f1e05a"),
+                   ("HTML", "#e34c26"), ("CSS", "#663399")]),
+    ("Tools & data", [("SQLite", "database"), ("Git", "git"), ("Node.js", "nodejs")]),
     ("Hardware", [("ARM", "chip"), ("FPGA", "fpga"), ("Linux", "linux"),
                   ("Hardware", "circuit")]),
+    ("Signal & power", [("SI Simulation", "signal"), ("PI Simulation", "power"),
+                        ("High-Speed Signals", "signal"), ("Signal integrity", "signal"),
+                        ("Power design", "power")]),
     ("Interfaces", [("PCIe", "bus"), ("USB", "bus"), ("MIPI", "bus")]),
 ]
 

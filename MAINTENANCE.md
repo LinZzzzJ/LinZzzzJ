@@ -23,10 +23,10 @@ new visuals become visible on GitHub after the workflow publishes them. Local
 SVGs can be opened directly for inspection.
 
 The name is **LinZzzzJ**. The introduction is **Think Deep. Automate the Rest.**
-The skills rows focus on MATLAB and Python, SI/PI simulation, high-speed signals,
-hardware and the PCIe/USB/MIPI interfaces. Keep FitTrack's application stack on its
-project page, not in the personal skills rows. Do not add private research links
-or experimental information.
+The skills rows retain the existing languages, SQLite, hardware platforms and
+workflow tools, remove PowerShell, Svelte, FastAPI, ECharts, HDF5 and Windows, and
+add PI/SI simulation, high-speed signals, PCIe, USB and MIPI. Do not add private
+research links or experimental information.
 
 The **Forks** section intentionally contains four empty tiles. Do not populate
 them automatically, add categories, or copy the reference account's forks. The

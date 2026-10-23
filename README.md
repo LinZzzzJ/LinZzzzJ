@@ -4,7 +4,7 @@
 
 <samp>Think Deep. Automate the Rest.</samp>
 
-<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/LinZzzzJ/LinZzzzJ/output/assets/stack-dark.svg"><img src="https://raw.githubusercontent.com/LinZzzzJ/LinZzzzJ/output/assets/stack-light.svg" width="100%" align="top" alt="Languages: MATLAB, Python. Signal integrity: SI Simulation, High-Speed Signals. Power integrity: PI Simulation, Power Design. Hardware: ARM, FPGA, Linux, Hardware. Interfaces: PCIe, USB, MIPI"></picture>
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/LinZzzzJ/LinZzzzJ/output/assets/stack-dark.svg"><img src="https://raw.githubusercontent.com/LinZzzzJ/LinZzzzJ/output/assets/stack-light.svg" width="100%" align="top" alt="Languages: MATLAB, Python, TypeScript, JavaScript, HTML, CSS. Tools &amp; data: SQLite, Git, Node.js. Hardware: ARM, FPGA, Linux, Hardware. Signal &amp; power: SI Simulation, PI Simulation, High-Speed Signals, Signal integrity, Power design. Interfaces: PCIe, USB, MIPI"></picture>
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/LinZzzzJ/LinZzzzJ/output/assets/section-projects-dark.svg"><img src="https://raw.githubusercontent.com/LinZzzzJ/LinZzzzJ/output/assets/section-projects-light.svg" width="100%" align="top" alt="Projects"></picture>
 

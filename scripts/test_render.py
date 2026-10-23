@@ -75,9 +75,12 @@ class ProfileRenderingTests(unittest.TestCase):
 
     def test_stack_has_real_glyphs_and_no_overflow_in_both_themes(self):
         skills = {name for _, items in render.STACK for name, _ in items}
-        self.assertTrue({"PI Simulation", "SI Simulation", "High-Speed Signals", "PCIe", "USB", "MIPI"}.issubset(skills))
-        self.assertTrue({"MATLAB", "Python", "ARM", "FPGA", "Linux"}.issubset(skills))
-        self.assertTrue({"PowerShell", "Svelte", "FastAPI", "ECharts", "HDF5", "Windows"}.isdisjoint(skills))
+        self.assertEqual(skills, {
+            "MATLAB", "Python", "TypeScript", "JavaScript", "HTML", "CSS", "SQLite",
+            "ARM", "FPGA", "Linux", "Hardware", "Signal integrity", "Power design",
+            "Git", "Node.js", "PI Simulation", "SI Simulation", "High-Speed Signals",
+            "PCIe", "USB", "MIPI"
+        })
         for theme in render.THEMES.values():
             content = render.render_stack(theme)
             root = ET.fromstring(content)
