@@ -22,12 +22,11 @@ the ignored `dist/` directory. README image URLs point to the `output` branch, s
 new visuals become visible on GitHub after the workflow publishes them. Local
 SVGs can be opened directly for inspection.
 
-The name is **LinZzJ**. The only introduction is
-**把真实问题研究清楚，把重复工作交给工具。** All existing skills remain in four compact
-rows: languages, apps/data, hardware and workflow. FitTrack is the only selected
-project. Its short English description is curated, while its language, stars and
-forks come from public repository metadata. Do not add private research links or
-experimental information.
+The name is **LinZzzzJ**. The introduction is **Think Deep. Automate the Rest.**
+The skills rows focus on MATLAB and Python, SI/PI simulation, high-speed signals,
+hardware and the PCIe/USB/MIPI interfaces. Keep FitTrack's application stack on its
+project page, not in the personal skills rows. Do not add private research links
+or experimental information.
 
 The **Forks** section intentionally contains four empty tiles. Do not populate
 them automatically, add categories, or copy the reference account's forks. The

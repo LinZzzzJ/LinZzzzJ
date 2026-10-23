@@ -49,6 +49,9 @@ class ProfileRenderingTests(unittest.TestCase):
         references = set(re.findall(re.escape(render.IMAGES) + r'([^"\s<>]+\.svg)', readme))
         self.assertEqual(references, set(outputs) | set(render.SNAKES))
         self.assertEqual(readme.count(render.MOTTO), 1)
+        self.assertIn(f'alt="{render.NAME}"', readme)
+        self.assertIn(f'>{render.NAME}</text>', outputs["name-light.svg"])
+        self.assertIn(f'>{render.NAME}</text>', outputs["name-dark.svg"])
         self.assertIn(f"https://github.com/{render.USER}/FitTrack", readme)
         self.assertNotIn("zeroherolin", readme)
         self.assertNotIn("stats-", readme)
@@ -71,6 +74,10 @@ class ProfileRenderingTests(unittest.TestCase):
                 self.assertLessEqual(render.sans_width(element.text, 12) * render.SLACK, 200)
 
     def test_stack_has_real_glyphs_and_no_overflow_in_both_themes(self):
+        skills = {name for _, items in render.STACK for name, _ in items}
+        self.assertTrue({"PI Simulation", "SI Simulation", "High-Speed Signals", "PCIe", "USB", "MIPI"}.issubset(skills))
+        self.assertTrue({"MATLAB", "Python", "ARM", "FPGA", "Linux"}.issubset(skills))
+        self.assertTrue({"PowerShell", "Svelte", "FastAPI", "ECharts", "HDF5", "Windows"}.isdisjoint(skills))
         for theme in render.THEMES.values():
             content = render.render_stack(theme)
             root = ET.fromstring(content)
@@ -86,7 +93,7 @@ class ProfileRenderingTests(unittest.TestCase):
                         self.assertIn("<path", render.icon(glyph, 0, 0, 12, theme["muted"]))
         self.assertEqual(render.sans_width("真实", 12), 24)
         lines = render.wrap(render.MOTTO, 12, 100, 10)
-        self.assertEqual("".join(lines), render.MOTTO)
+        self.assertEqual(" ".join(lines), render.MOTTO)
         self.assertTrue(all(render.sans_width(line, 12) * render.SLACK <= 100 for line in lines))
 
     def test_empty_languages_and_xml_escaping(self):
