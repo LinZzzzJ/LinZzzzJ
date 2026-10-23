@@ -9,6 +9,7 @@ on:
     paths:
       - '.github/workflows/profile.yml'
       - 'scripts/**'
+      - 'assets/icons/**'
       - 'package.json'
 
 permissions:
@@ -30,12 +31,16 @@ jobs:
         with:
           node-version: '24'
           package-manager-cache: false
-      - name: Test activity-data guards and atomic asset publishing
+      - name: Test rendering, activity guards and atomic publishing
         run: npm test
-      - name: Collect GitHub activity statistics and generate cards
+      - name: Collect and validate contribution data
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: node scripts/profile.mjs collect
+      - name: Render profile images and README
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: python3 scripts/render.py
       - name: Generate contribution snake
         uses: Platane/snk/svg-only@d8f6715049803e982ee5ff501b6b9b7d5deeb09b # v3
         with:
@@ -50,3 +55,14 @@ jobs:
         run: node scripts/profile.mjs verify
       - name: Atomically publish the complete SVG set
         run: node scripts/publish-assets.mjs
+      - name: Commit README if changed
+        run: |
+          git add README.md
+          if git diff --cached --quiet; then
+            echo "README unchanged"
+            exit 0
+          fi
+          git -c user.name='github-actions[bot]' \
+              -c user.email='41898282+github-actions[bot]@users.noreply.github.com' \
+              commit -m 'chore: update generated profile README'
+          git push origin HEAD:main

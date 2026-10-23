@@ -3,5 +3,8 @@
   "private": true,
   "type": "module",
   "engines": { "node": ">=24" },
-  "scripts": { "test": "node --test scripts/profile.test.mjs" }
+  "scripts": {
+    "render": "python3 scripts/render.py",
+    "test": "node --test scripts/profile.test.mjs && python3 -m unittest discover -s scripts -p 'test_*.py'"
+  }
 }

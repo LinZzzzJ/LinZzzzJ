@@ -1,14 +1,33 @@
-import { readFile, mkdir, mkdtemp, rm } from 'node:fs/promises';
+import { readFile, mkdtemp, rm } from 'node:fs/promises';
 import { join, resolve } from 'node:path';
 import { tmpdir } from 'node:os';
 import { spawnSync } from 'node:child_process';
 import { pathToFileURL } from 'node:url';
 
-export const ASSETS = ['stats-light.svg', 'stats-dark.svg', 'snake.svg', 'snake-dark.svg'];
+export const SNAKE_ASSETS = ['snake.svg', 'snake-dark.svg'];
+
+async function assetManifest(cwd, dist) {
+  const files = JSON.parse(await readFile(join(dist, 'assets.json'), 'utf8'));
+  if (!Array.isArray(files) || !files.length || new Set(files).size !== files.length ||
+      files.some(file => typeof file !== 'string' ||
+        !/^[a-zA-Z0-9_-]+(?:\/[a-zA-Z0-9_-]+)*\.svg$/.test(file)) ||
+      SNAKE_ASSETS.some(file => !files.includes(file))) {
+    throw new Error('Invalid or incomplete SVG asset manifest.');
+  }
+  const readme = await readFile(join(cwd, 'README.md'), 'utf8');
+  const references = [...readme.matchAll(/https:\/\/raw\.githubusercontent\.com\/[^/]+\/[^/]+\/output\/assets\/([^"\s<>]+\.svg)/g)]
+    .map(match => match[1]);
+  if (!references.length || references.some(file => !files.includes(file)) ||
+      files.some(file => !references.includes(file))) {
+    throw new Error('README references and the SVG asset manifest do not match.');
+  }
+  return files.sort();
+}
 
 export async function publishAssets({ cwd = process.cwd(), dist = resolve(cwd, 'dist') } = {}) {
+  const files = await assetManifest(cwd, dist);
   const documents = [];
-  for (const file of ASSETS) {
+  for (const file of files) {
     const bytes = await readFile(join(dist, file));
     const text = bytes.toString('utf8');
     if (bytes.length > 5 * 1024 * 1024 || !/<svg\b/i.test(text) || /<script\b|<foreignObject\b|\bonload\s*=|(?:href|src)\s*=\s*["'](?:https?:|data:)/i.test(text)) {
@@ -46,7 +65,7 @@ export async function publishAssets({ cwd = process.cwd(), dist = resolve(cwd, '
     }
     const commit = git(['commit-tree', tree, ...(parent ? ['-p', parent] : []), '-m', 'chore: update public profile visuals']);
     git(['push', 'origin', `${commit}:refs/heads/output`]);
-    console.log('Published four GitHub activity SVGs atomically to output.');
+    console.log(`Published ${documents.length} profile SVGs atomically to output.`);
     return { changed: true, commit };
   } finally {
     await rm(temp, { recursive: true, force: true });

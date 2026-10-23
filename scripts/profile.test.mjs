@@ -4,8 +4,8 @@ import { mkdtemp, mkdir, readFile, writeFile, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { execFileSync } from 'node:child_process';
-import { validateActivity, collectPublicData, renderStats, LOGIN } from './profile.mjs';
-import { publishAssets, ASSETS } from './publish-assets.mjs';
+import { validateActivity, collectPublicData, LOGIN } from './profile.mjs';
+import { publishAssets, SNAKE_ASSETS } from './publish-assets.mjs';
 
 const collection = (counts = [0, 2, 3]) => ({ data: { user: { login: LOGIN, contributionsCollection: {
   restrictedContributionsCount: 0, totalCommitContributions: 3, totalPullRequestContributions: 1,
@@ -48,17 +48,6 @@ test('stars paginate, exclude forks and other owners, and reject private metadat
   await assert.rejects(collectPublicData({ token: 'fixture', fetchImpl: async () => ({ ok: true, status: 200, json: async () => ++i === 1 ? collection() : [{ private: true }] }) }), /PRIVATE_REPOSITORY_VISIBLE/);
 });
 
-test('cards use real counts, a real active-day ring, escaped text and both themes', () => {
-  const data = { ...validateActivity(collection()), displayName: '<Lin & J>', stars: 17,
-    updatedAt: '2026-10-20T03:17:00Z', window: { from: '2025-10-20', to: '2026-10-20' } };
-  const light = renderStats(data); const dark = renderStats(data, true);
-  assert.match(light, /&lt;Lin &amp; J&gt;/); assert.doesNotMatch(light, /<Lin/);
-  assert.match(light, />17<\/text>/); assert.match(light, /Active GitHub days: 2\/3/);
-  assert.match(light, /2026-10-20 11:17/); assert.match(light, /#ffffff/); assert.match(dark, /#0d1117/);
-  const zero = { ...data, ...validateActivity(collection([0, 0])) };
-  assert.match(renderStats(zero), /Active GitHub days: 0\/2/);
-});
-
 test('atomic Git publication preserves main and old assets on failure; identical files create no commit', async () => {
   const dir = await mkdtemp(join(tmpdir(), 'profile-git-test-'));
   try {
@@ -67,19 +56,39 @@ test('atomic Git publication preserves main and old assets on failure; identical
     const git = (args, cwd = work) => execFileSync('git', args, { cwd, encoding: 'utf8', windowsHide: true, stdio: ['pipe', 'pipe', 'pipe'] }).trim();
     git(['init', '--bare', remote]); git(['init', '--initial-branch=main']);
     git(['config', 'user.name', 'Fixture']); git(['config', 'user.email', 'fixture@example.invalid']);
-    await writeFile(join(work, 'README.md'), 'Hand-written content must stay unchanged.\n');
+    const assets = [...SNAKE_ASSETS, 'name-light.svg', 'name-dark.svg', 'projects/FitTrack-light.svg', 'projects/FitTrack-dark.svg'];
+    const readme = 'Generated profile.\n' + assets.map(file =>
+      `<img src="https://raw.githubusercontent.com/LinZzzzJ/LinZzzzJ/output/assets/${file}">`).join('\n');
+    await writeFile(join(work, 'README.md'), readme);
     git(['add', 'README.md']); git(['commit', '-m', 'fixture']); git(['remote', 'add', 'origin', remote]); git(['push', '-u', 'origin', 'main']);
     const main = git(['rev-parse', 'HEAD']); const dist = join(work, 'dist'); await mkdir(dist);
-    for (const name of ASSETS) await writeFile(join(dist, name), '<svg xmlns="http://www.w3.org/2000/svg"><text>public fixture</text></svg>\n');
+    await mkdir(join(dist, 'projects'));
+    const fixture = '<svg xmlns="http://www.w3.org/2000/svg"><text>public fixture</text></svg>\n';
+    for (const name of assets) await writeFile(join(dist, name), fixture);
+    await writeFile(join(dist, 'assets.json'), JSON.stringify(assets));
+    // Old cards and intermediate metadata must never enter the published tree.
+    await writeFile(join(dist, 'stats-light.svg'), fixture);
+    await writeFile(join(dist, 'public-data.json'), '{"private":"local-only"}');
     const first = await publishAssets({ cwd: work, dist }); assert.equal(first.changed, true);
     const list = git(['--git-dir=' + remote, 'ls-tree', '-r', '--name-only', 'output']).split('\n');
-    assert.deepEqual(list, ASSETS.map(n => 'assets/' + n).sort());
+    assert.deepEqual(list, assets.map(n => 'assets/' + n).sort());
     const second = await publishAssets({ cwd: work, dist }); assert.equal(second.changed, false); assert.equal(second.commit, first.commit);
     assert.equal(git(['rev-parse', 'HEAD']), main);
     assert.equal(git(['--git-dir=' + remote, 'log', '-1', '--format=%an', 'output']), 'github-actions[bot]');
     await writeFile(join(dist, 'snake.svg'), '<svg><script>bad</script></svg>');
     await assert.rejects(publishAssets({ cwd: work, dist }), /Invalid/);
     assert.equal(git(['--git-dir=' + remote, 'rev-parse', 'output']), first.commit);
-    assert.match(await readFile(join(work, 'README.md'), 'utf8'), /Hand-written/);
+    assert.equal(await readFile(join(work, 'README.md'), 'utf8'), readme);
+    await writeFile(join(dist, 'snake.svg'), fixture);
+    await rm(join(dist, 'projects/FitTrack-dark.svg'));
+    await assert.rejects(publishAssets({ cwd: work, dist }), /ENOENT/);
+    await writeFile(join(dist, 'projects/FitTrack-dark.svg'), fixture);
+    await writeFile(join(dist, 'assets.json'), JSON.stringify(assets.filter(file => file !== 'name-dark.svg')));
+    await assert.rejects(publishAssets({ cwd: work, dist }), /README references/);
+    await writeFile(join(dist, 'assets.json'), JSON.stringify([...assets, '../secret.svg']));
+    await assert.rejects(publishAssets({ cwd: work, dist }), /Invalid/);
+    await writeFile(join(dist, 'assets.json'), JSON.stringify(assets.filter(file => file !== 'snake-dark.svg')));
+    await assert.rejects(publishAssets({ cwd: work, dist }), /incomplete/);
+    assert.equal(git(['--git-dir=' + remote, 'rev-parse', 'output']), first.commit);
   } finally { await rm(dir, { recursive: true, force: true }); }
 });

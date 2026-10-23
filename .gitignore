@@ -1,6 +1,7 @@
 node_modules/
 dist/
 .cache/
+__pycache__/
 *.tmp
 *.log
 .DS_Store

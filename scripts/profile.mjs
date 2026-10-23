@@ -97,40 +97,6 @@ export async function collectPublicData({ token, login = LOGIN, now = new Date()
   return { login, displayName: 'LinZzJ', updatedAt: end.toISOString(), window: period, stars, ...activity };
 }
 
-export const escapeXml = value => String(value).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&apos;' })[c]);
-
-export function renderStats(data, dark = false) {
-  const colors = dark
-    ? { background: '#0d1117', border: '#30363d', text: '#c9d1d9', muted: '#8b949e', blue: '#79c0ff', ring: '#1f6feb' }
-    : { background: '#ffffff', border: '#d0d7de', text: '#434d58', muted: '#6e7781', blue: '#2f80ed', ring: '#cfe1ff' };
-  const rows = [['Public Stars', data.stars], ['Visible Commits', data.commits], ['Visible PRs', data.prs], ['Visible Issues', data.issues], ['All Contributions', data.contributions]];
-  for (const [label, value] of rows) number(value, label);
-  const totalDays = data.days.length;
-  const activeDays = number(data.activeDays, 'activeDays');
-  if (activeDays > totalDays) throw new Error('Active-day count exceeds calendar size.');
-  const radius = 38, circumference = 2 * Math.PI * radius;
-  const fraction = totalDays ? activeDays / totalDays : 0;
-  const updated = new Date(data.updatedAt).toLocaleString('sv-SE', { timeZone: 'Asia/Shanghai', hour12: false }).slice(0, 16);
-  return `<svg xmlns="http://www.w3.org/2000/svg" width="450" height="224" viewBox="0 0 450 224" role="img" aria-labelledby="title desc">
-  <title id="title">${escapeXml(data.displayName)}'s GitHub Stats — GitHub activity</title>
-  <desc id="desc">Stars: public owned non-fork repositories. Activity: trailing twelve months. Active GitHub days: ${activeDays}/${totalDays}. Private activity is shown only as an anonymous aggregate.</desc>
-  <rect x=".5" y=".5" width="449" height="223" rx="6" fill="${colors.background}" stroke="${colors.border}"/>
-  <g font-family="-apple-system,BlinkMacSystemFont,Segoe UI,Arial,sans-serif">
-    <text x="24" y="33" fill="${colors.blue}" font-size="18" font-weight="600">${escapeXml(data.displayName)}'s GitHub Stats</text>
-    <text x="24" y="53" fill="${colors.muted}" font-size="10">GitHub activity · last 12 months</text>
-    ${rows.map(([label, value], i) => `<g transform="translate(24 ${78 + 23 * i})"><circle cx="5" cy="-4" r="3" fill="${colors.blue}"/><text x="20" fill="${colors.text}" font-size="12" font-weight="600">${label}:</text><text x="239" text-anchor="end" fill="${colors.text}" font-size="12" font-weight="600">${new Intl.NumberFormat('en-US').format(value)}</text></g>`).join('\n    ')}
-    <g transform="translate(359 117)">
-      <circle r="${radius}" fill="none" stroke="${colors.ring}" stroke-width="6"/>
-      <circle r="${radius}" fill="none" stroke="${colors.blue}" stroke-width="6" stroke-linecap="round" stroke-dasharray="${fraction * circumference} ${circumference}" transform="rotate(-90)"/>
-      <text y="-2" fill="${colors.text}" text-anchor="middle" font-size="23" font-weight="700">${activeDays}<tspan font-size="11" font-weight="400">d</tspan></text>
-      <text y="16" fill="${colors.muted}" text-anchor="middle" font-size="9">active GitHub days</text>
-    </g>
-    <text x="24" y="202" fill="${colors.muted}" font-size="9">Stars: current · Activity: ${escapeXml(data.window.from.slice(0, 10))}–${escapeXml(data.window.to.slice(0, 10))}</text>
-    <text x="24" y="216" fill="${colors.muted}" font-size="9">Updated ${escapeXml(updated)} (UTC+8)</text>
-  </g>
-</svg>\n`;
-}
-
 async function main() {
   if (process.env.GITHUB_ACTIONS !== 'true' || process.env.GITHUB_REPOSITORY !== `${LOGIN}/${LOGIN}`) {
     throw new Error('Live data collection is restricted to this public profile workflow and its own GITHUB_TOKEN.');
@@ -142,8 +108,6 @@ async function main() {
   if (command === 'collect') {
     const data = await collectPublicData(options);
     await mkdir(dist, { recursive: true });
-    await writeFile(join(dist, 'stats-light.svg'), renderStats(data));
-    await writeFile(join(dist, 'stats-dark.svg'), renderStats(data, true));
     await writeFile(snapshot, JSON.stringify(data, null, 2));
     console.log(`GitHub activity snapshot collected: ${data.contributions} contributions, ${data.activeDays} active days (${data.restrictedContributions} anonymous private).`);
   } else if (command === 'verify') {
