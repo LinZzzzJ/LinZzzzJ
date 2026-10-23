@@ -58,7 +58,8 @@ export function validateActivity(body, login = LOGIN) {
   };
 }
 
-export async function collectPublicData({ token, login = LOGIN, now = new Date(), fetchImpl = fetch, window }) {
+export async function collectPublicData({ token, login = LOGIN, now = new Date(), fetchImpl = fetch, window,
+  retryDelay = milliseconds => new Promise(accept => setTimeout(accept, milliseconds)) }) {
   if (!token) throw new Error('The workflow GITHUB_TOKEN is required.');
   const end = new Date(now);
   const start = new Date(end);
@@ -66,18 +67,34 @@ export async function collectPublicData({ token, login = LOGIN, now = new Date()
   const period = window ?? { from: start.toISOString(), to: end.toISOString() };
   async function request(path, payload) {
     let response;
+    const method = payload ? 'POST' : 'GET';
     for (let attempt = 0; attempt < 3; attempt++) {
-      response = await fetchImpl(API + path, {
-        method: payload ? 'POST' : 'GET',
-        headers: { Accept: 'application/vnd.github+json', Authorization: `Bearer ${token}`,
-          'Content-Type': 'application/json', 'X-GitHub-Api-Version': '2022-11-28' },
-        ...(payload ? { body: JSON.stringify(payload) } : {}),
-        signal: AbortSignal.timeout(30000)
-      });
-      if (response.status < 500 || attempt === 2) break;
-      await new Promise(accept => setTimeout(accept, 1000 * (attempt + 1)));
+      try {
+        response = await fetchImpl(API + path, {
+          method,
+          headers: { Accept: 'application/vnd.github+json', Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json', 'X-GitHub-Api-Version': '2022-11-28' },
+          ...(payload ? { body: JSON.stringify(payload) } : {}),
+          signal: AbortSignal.timeout(30000)
+        });
+      } catch (error) {
+        const endpoint = new URL(API + path).pathname;
+        const causeCode = error.cause?.code;
+        const detail = [error.message || error.name, causeCode].filter(Boolean).join('; ');
+        if (attempt === 2) {
+          throw new Error(`GitHub ${method} ${endpoint} network request failed after 3 attempts (${detail}).`, { cause: error });
+        }
+        console.warn(`GitHub ${method} ${endpoint} network request failed (${detail}); retrying (${attempt + 2}/3).`);
+        await retryDelay(1000 * (attempt + 1));
+        continue;
+      }
+      if ((response.status < 500 && response.status !== 429) || attempt === 2) break;
+      await retryDelay(1000 * (attempt + 1));
     }
-    if (!response.ok) throw new Error(`GitHub activity-data request failed (HTTP ${response.status}).`);
+    if (!response.ok) {
+      const endpoint = new URL(API + path).pathname;
+      throw new Error(`GitHub ${method} ${endpoint} request failed (HTTP ${response.status}).`);
+    }
     return response.json();
   }
   const body = await request('/graphql', { query: QUERY, variables: { login, ...period } });

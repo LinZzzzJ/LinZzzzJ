@@ -48,6 +48,25 @@ test('stars paginate, exclude forks and other owners, and reject private metadat
   await assert.rejects(collectPublicData({ token: 'fixture', fetchImpl: async () => ({ ok: true, status: 200, json: async () => ++i === 1 ? collection() : [{ private: true }] }) }), /PRIVATE_REPOSITORY_VISIBLE/);
 });
 
+test('transient fetch failures retry and persistent failures identify the GitHub endpoint', async () => {
+  let calls = 0;
+  const fetchImpl = async url => {
+    calls++;
+    if (url.endsWith('/graphql') && calls === 1) {
+      throw new TypeError('fetch failed', { cause: Object.assign(new Error('socket reset'), { code: 'ECONNRESET' }) });
+    }
+    return { ok: true, status: 200, json: async () => url.endsWith('/graphql') ? collection() : [] };
+  };
+  const data = await collectPublicData({ token: 'fixture', fetchImpl, retryDelay: async () => {} });
+  assert.equal(data.contributions, 5);
+  assert.equal(calls, 3);
+
+  await assert.rejects(collectPublicData({
+    token: 'fixture', retryDelay: async () => {},
+    fetchImpl: async () => { throw new TypeError('fetch failed', { cause: Object.assign(new Error('socket timeout'), { code: 'ETIMEDOUT' }) }); }
+  }), /GitHub POST \/graphql network request failed after 3 attempts \(fetch failed; ETIMEDOUT\)/);
+});
+
 test('atomic Git publication preserves main and old assets on failure; identical files create no commit', async () => {
   const dir = await mkdtemp(join(tmpdir(), 'profile-git-test-'));
   try {

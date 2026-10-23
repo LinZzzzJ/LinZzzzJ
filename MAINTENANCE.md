@@ -76,6 +76,9 @@ and intermediate API responses are never published.
 - The workflow uses its own `GITHUB_TOKEN`; no personal access token or private
   repository credential is needed. Public repository collection rejects private
   metadata. Contribution snapshots and API responses stay local to the workflow.
+- The activity collector retries transient network failures, HTTP 429 responses
+  and server errors up to three times. A final network failure names the endpoint
+  and underlying network error code when Node.js provides one.
 
 Run `npm test` after changing the renderer, activity collector or publisher. Tests
 cover theme/layout output, XML escaping, public data selection, empty language
