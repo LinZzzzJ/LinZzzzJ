@@ -14,7 +14,10 @@ import re
 import unicodedata
 import time
 import urllib.error
+import urllib.parse
 import urllib.request
+from concurrent.futures import ThreadPoolExecutor
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from xml.sax.saxutils import escape
 
@@ -27,6 +30,7 @@ BUILD = ROOT / "dist"
 README = ROOT / "README.md"
 IMAGES = f"https://raw.githubusercontent.com/{USER}/{USER}/output/assets/"
 SNAKES = ["snake.svg", "snake-dark.svg"]
+TZ = timezone(timedelta(hours=8))
 
 WIDTH = 840  # canvas of full-width images, about the width of a profile README
 MONO = "ui-monospace,SFMono-Regular,'SF Mono',Menlo,Consolas,'Liberation Mono',monospace"
@@ -37,6 +41,13 @@ PROJECTS = [
     ("FitTrack", "App",
      "Local-first fitness logs with AI assistance and trend analysis."),
 ]
+
+# Each category is a column; four categories form a block. Learning and
+# Uncategorized instead fill all columns row by row, matching the reference.
+FORKS = [
+    ("Agent", ["dsh-purge"]),
+]
+ROW_MAJOR = ("Learning", "Uncategorized")
 
 # Compact hardware-focused skills; application dependencies stay with the project.
 STACK = [
@@ -262,17 +273,48 @@ def render_project(name, area, desc, repo, gap_below, t):
     return svg(CARD_W + CARD_GAP, height, f"{name}: {desc}", "\n".join(body), defs)
 
 
-# -- reserved fork grid ---------------------------------------------------------
+# -- fork cards ------------------------------------------------------------------
 
-COLUMNS = 4
-TILE_W, TILE_H = WIDTH // COLUMNS, 36
+COLUMNS = 4                            # fork columns per block of the grid
+TILE_W, TILE_H = WIDTH // COLUMNS, 36  # includes a 12px gap on the right
+HEADING_H = (26, 40)                   # heading rows: first block, later blocks (spaced apart)
 
 
-def render_fork_placeholder(t):
-    # Match the reference's tile border; no names, counts or sync indicators yet.
-    return svg(TILE_W, TILE_H, "Reserved fork slot",
-               f'<rect x="0.5" y="5.5" width="{TILE_W - 13}" height="25" rx="4" '
-               f'fill="none" stroke="{t["faint"]}"/>')
+def compact(n):
+    """1234 -> 1.2k, the way GitHub abbreviates counts."""
+    if n < 1000:
+        return str(n)
+    return f"{n / 1000:.1f}k" if n < 9950 else f"{round(n / 1000)}k"
+
+
+def render_fork(name, behind, t):
+    """Fork card; on the right a check if the default branch is level with
+    upstream, the number of commits it is behind, or an x if that is unknown."""
+    x1 = TILE_W - 12.5
+    right = x1 - 9
+    body = [f'<rect x="0.5" y="5.5" width="{x1 - 0.5}" height="25" rx="4" fill="none" stroke="{t["faint"]}"/>']
+    if behind == 0:
+        status_w, title = 12, f"{name}: up to date with upstream"
+        body.append(icon("check", right - 12, 12, 12, t["muted"]))
+    elif behind:
+        label = compact(behind)
+        status_w, title = mono_width(label, 11) + 12, f"{name}: {behind} commits behind upstream"
+        body.append(icon("arrow-down", right - status_w, 13, 10, t["faint"]))
+        body.append(text(right, 22.5, label, 11, t["muted"], anchor="end"))
+    else:
+        status_w, title = 12, f"{name}: sync status unavailable"
+        body.append(icon("x", right - 12, 12, 12, t["muted"]))
+    name_label, size = fit(name, 12, right - status_w - 10 - 12, 12)
+    body.append(text(12, 22.5, name_label, size, t["fg"]))
+    return svg(TILE_W, TILE_H, title, "\n".join(body))
+
+
+def render_fork_heading(title, count, height, t):
+    right, base = TILE_W - 12, height - 15
+    body = [text(0, base, title.upper(), 11, t["fg"], weight="700", spacing=1),
+            text(right, base, str(count), 11, t["faint"], anchor="end"),
+            rule(0, right, base + 8.5, t)]
+    return svg(TILE_W, height, title, "\n".join(body))
 
 
 # -- languages -----------------------------------------------------------------
@@ -324,12 +366,46 @@ def shelf_html():
     return "<pre>" + "\n".join(rows) + "</pre>"
 
 
-def forks_html():
-    tiles = [picture("forks/placeholder", "", "25%") for _ in range(COLUMNS)]
+def slug(title):
+    return re.sub(r"[^a-z0-9]+", "-", title.lower()).strip("-")
+
+
+def grid_blocks(columns):
+    """The fork grid top to bottom, as (row_major, categories): column blocks of
+    up to COLUMNS categories side by side, then one block per ROW_MAJOR category."""
+    side = [c for c in columns if c[0] not in ROW_MAJOR]
+    wide = sorted((c for c in columns if c[0] in ROW_MAJOR), key=lambda c: ROW_MAJOR.index(c[0]))
+    return [(False, side[i:i + COLUMNS]) for i in range(0, len(side), COLUMNS)] + [(True, [c]) for c in wide]
+
+
+def grid_html(blocks, upstreams):
+    width = f"{100 / COLUMNS:g}%"
+    # Fills empty cells, so every row spans COLUMNS tiles; 1px tall, so it never sets a row's height.
+    blank = f'<picture><img src="{IMAGES}forks/blank.svg" width="{width}" align="top" alt=""></picture>'
+
+    def tile(name):
+        upstream = upstreams.get(name)
+        alt = f"{name}, a fork of {upstream}" if upstream else name
+        return f'<a href="https://github.com/{USER}/{name}">{picture(f"forks/{name}", alt, width, tooltip=True)}</a>'
+
+    tiles = []
+    for row_major, block in blocks:
+        if row_major:
+            (title, repos), = block
+            tiles += [picture(f"forks/_{slug(title)}", title, width)] + [blank] * (COLUMNS - 1)
+            for i in range(0, len(repos), COLUMNS):
+                row = repos[i:i + COLUMNS]
+                tiles += [tile(name) for name in row] + [blank] * (COLUMNS - len(row))
+            continue
+        pad = [blank] * (COLUMNS - len(block))
+        tiles += [picture(f"forks/_{slug(title)}", title, width) for title, _ in block] + pad
+        for row in range(max(len(repos) for _, repos in block)):
+            tiles += [tile(repos[row]) if row < len(repos) else blank for _, repos in block] + pad
+    # Tiles must touch: break lines after a tag name rather than between tags.
     return "<p>" + "".join(re.sub(r"^<(\w+)", "<\\1\n", tile) for tile in tiles) + "</p>"
 
 
-def readme_md(shares):
+def readme_md(columns, upstreams, shares):
     stack = ". ".join(f"{label}: {', '.join(name for name, _ in items)}" for label, items in STACK)
     snake = (f'<picture><source media="(prefers-color-scheme: dark)" srcset="{IMAGES}snake-dark.svg">'
              f'<img src="{IMAGES}snake.svg" width="100%" align="top" '
@@ -342,8 +418,7 @@ def readme_md(shares):
         picture("section-projects", "Projects", "100%"),
         shelf_html(),
         picture("section-forks", "Forks", "100%"),
-        "<!-- Forks are reserved; repositories and categories will be added after confirmation. -->",
-        forks_html(),
+        grid_html(grid_blocks(columns), upstreams),
         picture("section-languages", "Languages", "100%"),
         picture("languages", "Languages by code size: " + (", ".join(lang for lang, _ in shares) or "no public data"), "100%"),
         picture("section-contributions", "GitHub Contributions", "100%"),
@@ -403,6 +478,50 @@ def public_projects(owned):
             and r["name"].lower() != USER.lower()}
 
 
+def fork_columns(forks):
+    """FORKS limited to the given fork names, plus a column for the ones it misses."""
+    listed = {name for _, names in FORKS for name in names}
+    for name in sorted(listed - forks, key=str.lower):
+        warn(f"{name} is in FORKS but is not a fork of {USER}; skipped")
+    columns = [(title, [n for n in names if n in forks]) for title, names in FORKS]
+    columns = [(title, names) for title, names in columns if names]
+    unlisted = sorted(forks - listed, key=str.lower)
+    if unlisted:
+        warn(f"not in FORKS, shown as Uncategorized: {', '.join(unlisted)}")
+        columns.append(("Uncategorized", unlisted))
+    return columns
+
+
+def fork_status(name):
+    """Return the API parent and commits missing from the fork's default branch.
+
+    With the fork as comparison base and upstream as head, GitHub's ahead_by
+    counts upstream commits absent from the fork. Failure stays unknown, not 0.
+    """
+    upstream = None
+    try:
+        repo = get(f"https://api.github.com/repos/{USER}/{name}")
+        if (not isinstance(repo, dict) or repo.get("private") is not False or repo.get("fork") is not True
+                or repo.get("owner", {}).get("login", "").lower() != USER.lower()):
+            raise ValueError("unexpected public fork metadata")
+        parent = repo["parent"]
+        if not isinstance(parent, dict) or parent.get("private") is not False:
+            raise ValueError("upstream is not public")
+        upstream = parent["full_name"]
+        head = f"{parent['owner']['login']}:{parent['default_branch']}"
+        comparison = get(
+            f"https://api.github.com/repos/{USER}/{name}/compare/"
+            f"{urllib.parse.quote(repo['default_branch'], safe='')}..."
+            f"{urllib.parse.quote(head, safe=':')}")
+        behind = comparison["ahead_by"]
+        if not isinstance(behind, int) or isinstance(behind, bool) or behind < 0:
+            raise ValueError("invalid upstream commit count")
+        return upstream, behind
+    except (urllib.error.URLError, ConnectionError, KeyError, TypeError, ValueError, TimeoutError) as error:
+        warn(f"no sync status for {name}: {error!r}")
+        return upstream, None
+
+
 def language_shares(repos):
     totals = {}
     for repo in repos:
@@ -428,14 +547,24 @@ def render(owned):
         if name not in repos:
             raise ValueError(f"{name} is not a public non-fork repository of {USER}")
     shares = language_shares(repos.values())
+    columns = fork_columns({r["name"] for r in owned
+                            if r.get("private") is False and r.get("fork") is True
+                            and r.get("owner", {}).get("login", "").lower() == USER.lower()})
+    fork_names = [name for _, names in columns for name in names]
+    with ThreadPoolExecutor(max_workers=8) as pool:
+        statuses = dict(zip(fork_names, pool.map(fork_status, fork_names)))
+    upstreams = {name: upstream for name, (upstream, _) in statuses.items()}
+    behind = {name: count for name, (_, count) in statuses.items()}
+    blocks = grid_blocks(columns)
+    today = datetime.now(TZ).strftime("%Y-%m-%d")
     outputs = {}
     for theme, t in THEMES.items():
         outputs[f"name-{theme}.svg"] = render_name(t)
         outputs[f"stack-{theme}.svg"] = render_stack(t)
         project_hint = "SCROLL →" if len(PROJECTS) > 2 else ""
         outputs[f"section-projects-{theme}.svg"] = render_section("Projects", len(PROJECTS), project_hint, t)
-        outputs[f"section-forks-{theme}.svg"] = render_section("Forks", None, "", t)
-        outputs[f"forks/placeholder-{theme}.svg"] = render_fork_placeholder(t)
+        outputs[f"section-forks-{theme}.svg"] = render_section(
+            "Forks", len(fork_names), f"COMMITS BEHIND UPSTREAM · {today}", t, hint_icon="arrow-down")
         outputs[f"section-languages-{theme}.svg"] = render_section(
             "Languages", None, f"BY CODE SIZE · {len(repos)} REPOS", t)
         outputs[f"languages-{theme}.svg"] = render_languages(shares, t)
@@ -445,7 +574,16 @@ def render(owned):
             gap_below = i % SHELF_ROWS < SHELF_ROWS - 1
             outputs[f"projects/{name}-{theme}.svg"] = render_project(
                 name, area, desc, repos[name], gap_below, t)
-    return outputs, readme_md(shares)
+        for block_index, (_, block) in enumerate(blocks):
+            for title, forks in block:
+                outputs[f"forks/_{slug(title)}-{theme}.svg"] = render_fork_heading(
+                    title, len(forks), HEADING_H[block_index > 0], t)
+                for name in forks:
+                    outputs[f"forks/{name}-{theme}.svg"] = render_fork(name, behind[name], t)
+    readme = readme_md(columns, upstreams, shares)
+    if f"{IMAGES}forks/blank.svg" in readme:
+        outputs["forks/blank.svg"] = svg(TILE_W, 1, "", "")
+    return outputs, readme
 
 
 def main():

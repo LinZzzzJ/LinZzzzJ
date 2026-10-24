@@ -13,13 +13,15 @@ href="https://github.com/LinZzzzJ/FitTrack"><picture><source media="(prefers-col
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/LinZzzzJ/LinZzzzJ/output/assets/section-forks-dark.svg"><img src="https://raw.githubusercontent.com/LinZzzzJ/LinZzzzJ/output/assets/section-forks-light.svg" width="100%" align="top" alt="Forks"></picture>
 
-<!-- Forks are reserved; repositories and categories will be added after confirmation. -->
-
 <p><picture
-><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/LinZzzzJ/LinZzzzJ/output/assets/forks/placeholder-dark.svg"><img src="https://raw.githubusercontent.com/LinZzzzJ/LinZzzzJ/output/assets/forks/placeholder-light.svg" width="25%" align="top" alt=""></picture><picture
-><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/LinZzzzJ/LinZzzzJ/output/assets/forks/placeholder-dark.svg"><img src="https://raw.githubusercontent.com/LinZzzzJ/LinZzzzJ/output/assets/forks/placeholder-light.svg" width="25%" align="top" alt=""></picture><picture
-><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/LinZzzzJ/LinZzzzJ/output/assets/forks/placeholder-dark.svg"><img src="https://raw.githubusercontent.com/LinZzzzJ/LinZzzzJ/output/assets/forks/placeholder-light.svg" width="25%" align="top" alt=""></picture><picture
-><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/LinZzzzJ/LinZzzzJ/output/assets/forks/placeholder-dark.svg"><img src="https://raw.githubusercontent.com/LinZzzzJ/LinZzzzJ/output/assets/forks/placeholder-light.svg" width="25%" align="top" alt=""></picture></p>
+><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/LinZzzzJ/LinZzzzJ/output/assets/forks/_agent-dark.svg"><img src="https://raw.githubusercontent.com/LinZzzzJ/LinZzzzJ/output/assets/forks/_agent-light.svg" width="25%" align="top" alt="Agent"></picture><picture
+><img src="https://raw.githubusercontent.com/LinZzzzJ/LinZzzzJ/output/assets/forks/blank.svg" width="25%" align="top" alt=""></picture><picture
+><img src="https://raw.githubusercontent.com/LinZzzzJ/LinZzzzJ/output/assets/forks/blank.svg" width="25%" align="top" alt=""></picture><picture
+><img src="https://raw.githubusercontent.com/LinZzzzJ/LinZzzzJ/output/assets/forks/blank.svg" width="25%" align="top" alt=""></picture><a
+ href="https://github.com/LinZzzzJ/dsh-purge"><picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/LinZzzzJ/LinZzzzJ/output/assets/forks/dsh-purge-dark.svg"><img src="https://raw.githubusercontent.com/LinZzzzJ/LinZzzzJ/output/assets/forks/dsh-purge-light.svg" width="25%" title="dsh-purge, a fork of mmparko/dsh-purge" align="top" alt="dsh-purge, a fork of mmparko/dsh-purge"></picture></a><picture
+><img src="https://raw.githubusercontent.com/LinZzzzJ/LinZzzzJ/output/assets/forks/blank.svg" width="25%" align="top" alt=""></picture><picture
+><img src="https://raw.githubusercontent.com/LinZzzzJ/LinZzzzJ/output/assets/forks/blank.svg" width="25%" align="top" alt=""></picture><picture
+><img src="https://raw.githubusercontent.com/LinZzzzJ/LinZzzzJ/output/assets/forks/blank.svg" width="25%" align="top" alt=""></picture></p>
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/LinZzzzJ/LinZzzzJ/output/assets/section-languages-dark.svg"><img src="https://raw.githubusercontent.com/LinZzzzJ/LinZzzzJ/output/assets/section-languages-light.svg" width="100%" align="top" alt="Languages"></picture>
 

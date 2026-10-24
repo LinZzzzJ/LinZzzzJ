@@ -6,7 +6,7 @@ section rules, project shelf, language chart and four-column fork tiles.
 
 ## Editing and previewing
 
-Edit the name, motto, `STACK` and `PROJECTS` in `scripts/render.py`, then run:
+Edit the name, motto, `STACK`, `PROJECTS` and `FORKS` in `scripts/render.py`, then run:
 
 ```sh
 python3 scripts/render.py
@@ -28,13 +28,32 @@ workflow tools, remove PowerShell, Svelte, FastAPI, ECharts, HDF5 and Windows, a
 add PI/SI simulation, high-speed signals, PCIe, USB and MIPI. Do not add private
 research links or experimental information.
 
-The **Forks** section intentionally contains four empty tiles. Do not populate
-them automatically, add categories, or copy the reference account's forks. The
-owner will confirm repositories and ordering later.
+The **Forks** section uses the reference project's display rules. `FORKS` maps
+category names to this account's fork repository names, in display order. The
+initial category is **Agent**, containing **dsh-purge**. Cards link to this
+account's forks; categories show their project counts. No repositories are copied
+from the reference account's configuration.
+
+Each category occupies one of four columns and lists its forks vertically. Empty
+categories are hidden; configured repositories no longer present as public forks
+are skipped with a warning. New public forks not listed in `FORKS` appear in
+**Uncategorized**, sorted by name. **Learning** and **Uncategorized** fill four
+columns row by row after the other categories. Transparent 1px padding fills
+unused cells without drawing empty cards.
+
+The Forks section shows its total count and the update date in China Standard
+Time. Each card compares its default branch against its API-reported parent's
+default branch: a check means no missing upstream commits, a down arrow and
+number show commits behind, and a cross means status could not be fetched.
+Being ahead does not prevent a check when no upstream commits are missing. A
+missing parent or failed comparison keeps the card and logs a warning instead of
+displaying a false zero. The upstream name in the tooltip comes from GitHub's
+`parent` metadata, not the repository description. This does not sync or modify
+any fork's code.
 
 The old colored toolkit tiles remain available under `assets/icons/`. The new
-monochrome glyphs are under `assets/icons/mono/`: the star, fork and Linux glyphs
-come from the reference project; Svelte, FastAPI, Git and Node.js are from
+monochrome glyphs are under `assets/icons/mono/`: the star, fork, Linux and status
+glyphs come from the reference project; Svelte, FastAPI, Git and Node.js are from
 [Simple Icons](https://github.com/simple-icons/simple-icons) v16 (CC0); the small
 data, hardware and Windows symbols are original vector drawings.
 
@@ -67,8 +86,9 @@ and intermediate API responses are never published.
   repositories, excluding the profile repository. The largest seven languages
   are shown individually and the remainder as **Other**. Empty language data
   displays an empty state; failed API requests stop generation.
-- Project card numbers are current public repository data. Forks stay reserved
-  even if new forks appear on the account.
+- Project card numbers and fork synchronization statuses use current public
+  repository data. The daily run discovers new public forks automatically;
+  running the workflow manually displays them sooner.
 - The snake follows the trailing-year contribution calendar. Private activity,
   when enabled on the profile, is included only as anonymous contribution counts.
   Contribution dates are never synthesized or backdated.
@@ -80,6 +100,7 @@ and intermediate API responses are never published.
   and underlying network error code when Node.js provides one.
 
 Run `npm test` after changing the renderer, activity collector or publisher. Tests
-cover theme/layout output, XML escaping, public data selection, empty language
-data, API failure, anonymous contribution validation and atomic publication to a
-temporary local Git remote. They never publish to GitHub.
+cover theme/layout output, fork grouping and synchronization, XML escaping,
+public data selection, empty language data, API failure, anonymous contribution
+validation and atomic publication to a temporary local Git remote. They never
+publish to GitHub.

@@ -75,18 +75,23 @@ test('atomic Git publication preserves main and old assets on failure; identical
     const git = (args, cwd = work) => execFileSync('git', args, { cwd, encoding: 'utf8', windowsHide: true, stdio: ['pipe', 'pipe', 'pipe'] }).trim();
     git(['init', '--bare', remote]); git(['init', '--initial-branch=main']);
     git(['config', 'user.name', 'Fixture']); git(['config', 'user.email', 'fixture@example.invalid']);
-    const assets = [...SNAKE_ASSETS, 'name-light.svg', 'name-dark.svg', 'projects/FitTrack-light.svg', 'projects/FitTrack-dark.svg'];
+    const assets = [...SNAKE_ASSETS, 'name-light.svg', 'name-dark.svg',
+      'projects/FitTrack-light.svg', 'projects/FitTrack-dark.svg',
+      'forks/_agent-light.svg', 'forks/_agent-dark.svg',
+      'forks/dsh-purge-light.svg', 'forks/dsh-purge-dark.svg', 'forks/blank.svg'];
     const readme = 'Generated profile.\n' + assets.map(file =>
       `<img src="https://raw.githubusercontent.com/LinZzzzJ/LinZzzzJ/output/assets/${file}">`).join('\n');
     await writeFile(join(work, 'README.md'), readme);
     git(['add', 'README.md']); git(['commit', '-m', 'fixture']); git(['remote', 'add', 'origin', remote]); git(['push', '-u', 'origin', 'main']);
     const main = git(['rev-parse', 'HEAD']); const dist = join(work, 'dist'); await mkdir(dist);
     await mkdir(join(dist, 'projects'));
+    await mkdir(join(dist, 'forks'));
     const fixture = '<svg xmlns="http://www.w3.org/2000/svg"><text>public fixture</text></svg>\n';
     for (const name of assets) await writeFile(join(dist, name), fixture);
     await writeFile(join(dist, 'assets.json'), JSON.stringify(assets));
     // Old cards and intermediate metadata must never enter the published tree.
     await writeFile(join(dist, 'stats-light.svg'), fixture);
+    await writeFile(join(dist, 'forks/placeholder-light.svg'), fixture);
     await writeFile(join(dist, 'public-data.json'), '{"private":"local-only"}');
     const first = await publishAssets({ cwd: work, dist }); assert.equal(first.changed, true);
     const list = git(['--git-dir=' + remote, 'ls-tree', '-r', '--name-only', 'output']).split('\n');
