@@ -81,7 +81,8 @@ test('atomic Git publication preserves main and old assets on failure; identical
       'forks/_vibecoding-app-light.svg', 'forks/_vibecoding-app-dark.svg',
       'forks/dsh-purge-light.svg', 'forks/dsh-purge-dark.svg',
       'forks/hindsight_linzzzzj-light.svg', 'forks/hindsight_linzzzzj-dark.svg',
-      'forks/openGym_FitTrack-light.svg', 'forks/openGym_FitTrack-dark.svg', 'forks/blank.svg'];
+      'forks/openGym_FitTrack-light.svg', 'forks/openGym_FitTrack-dark.svg',
+      'forks/brushgraft_enhance-light.svg', 'forks/brushgraft_enhance-dark.svg', 'forks/blank.svg'];
     const readme = 'Generated profile.\n' + assets.map(file =>
       `<img src="https://raw.githubusercontent.com/LinZzzzJ/LinZzzzJ/output/assets/${file}">`).join('\n');
     await writeFile(join(work, 'README.md'), readme);

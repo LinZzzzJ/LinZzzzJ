@@ -46,7 +46,7 @@ PROJECTS = [
 # Uncategorized instead fill all columns row by row, matching the reference.
 FORKS = [
     ("AI AGENTS", ["dsh-purge", "hindsight_linzzzzj"]),
-    ("VIBECODING APP", ["openGym_FitTrack"]),
+    ("VIBECODING APP", ["openGym_FitTrack", "brushgraft_enhance"]),
 ]
 ROW_MAJOR = ("Learning", "Uncategorized")
 
