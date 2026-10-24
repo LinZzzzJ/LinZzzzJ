@@ -45,7 +45,7 @@ PROJECTS = [
 # Each category is a column; four categories form a block. Learning and
 # Uncategorized instead fill all columns row by row, matching the reference.
 FORKS = [
-    ("AI AGENTS", ["dsh-purge"]),
+    ("AI AGENTS", ["dsh-purge", "hindsight_linzzzzj"]),
     ("VIBECODING APP", ["openGym_FitTrack"]),
 ]
 ROW_MAJOR = ("Learning", "Uncategorized")

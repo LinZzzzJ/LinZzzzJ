@@ -196,7 +196,7 @@ class ForkRenderingTests(unittest.TestCase):
         self.assertIn("gone", warnings)
         self.assertIn("Uncategorized", warnings)
 
-    def test_new_vibecoding_fork_is_in_its_category_and_agent_is_renamed(self):
+    def test_new_forks_are_grouped_by_category_and_agent_is_renamed(self):
         def get(url):
             if url.endswith("/FitTrack/languages"):
                 return {"Python": 10}
@@ -209,16 +209,30 @@ class ForkRenderingTests(unittest.TestCase):
                         "owner": {"login": render.USER}, "default_branch": "main",
                         "parent": {"private": False, "full_name": "DuarteSantos8/openGym",
                                    "owner": {"login": "DuarteSantos8"}, "default_branch": "main"}}
+            if url.endswith("/hindsight_linzzzzj"):
+                return {"name": "hindsight_linzzzzj", "private": False, "fork": True,
+                        "owner": {"login": render.USER}, "default_branch": "main",
+                        "parent": {"private": False, "full_name": "vectorize-io/hindsight",
+                                   "owner": {"login": "vectorize-io"}, "default_branch": "main"}}
             self.fail(f"unexpected API request: {url}")
 
         with patch.object(render, "get", side_effect=get):
-            outputs, readme = render.render([repo(), self.metadata(), repo(
-                "openGym_FitTrack", fork=True, default_branch="main", parent={
+            outputs, readme = render.render([
+                repo(), self.metadata(),
+                repo("openGym_FitTrack", fork=True, default_branch="main", parent={
                     "private": False, "full_name": "DuarteSantos8/openGym",
-                    "owner": {"login": "DuarteSantos8"}, "default_branch": "main"})])
+                    "owner": {"login": "DuarteSantos8"}, "default_branch": "main"}),
+                repo("hindsight_linzzzzj", fork=True, default_branch="main", parent={
+                    "private": False, "full_name": "vectorize-io/hindsight",
+                    "owner": {"login": "vectorize-io"}, "default_branch": "main"})
+            ])
         self.assertIn('href="https://github.com/LinZzzzJ/openGym_FitTrack"', readme)
         self.assertIn("openGym_FitTrack, a fork of DuarteSantos8/openGym", readme)
+        self.assertIn('href="https://github.com/LinZzzzJ/hindsight_linzzzzj"', readme)
+        self.assertIn("hindsight_linzzzzj, a fork of vectorize-io/hindsight", readme)
         self.assertIn("AI AGENTS", outputs["forks/_ai-agents-light.svg"])
+        self.assertIn(">2</text>", outputs["forks/_ai-agents-light.svg"])
+        self.assertIn("up to date with upstream", outputs["forks/hindsight_linzzzzj-light.svg"])
         self.assertIn("VIBECODING APP", outputs["forks/_vibecoding-app-light.svg"])
         self.assertIn("up to date with upstream", outputs["forks/openGym_FitTrack-light.svg"])
         self.assertNotIn("forks/_agent-light.svg", outputs)
