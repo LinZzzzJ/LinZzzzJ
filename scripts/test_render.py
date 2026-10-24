@@ -219,6 +219,11 @@ class ForkRenderingTests(unittest.TestCase):
                         "owner": {"login": render.USER}, "default_branch": "main",
                         "parent": {"private": False, "full_name": "zeroherolin/brushgraft",
                                    "owner": {"login": "zeroherolin"}, "default_branch": "main"}}
+            if url.endswith("/rea_linzzzzj"):
+                return {"name": "rea_linzzzzj", "private": False, "fork": True,
+                        "owner": {"login": render.USER}, "default_branch": "main",
+                        "parent": {"private": False, "full_name": "morluto/rea",
+                                   "owner": {"login": "morluto"}, "default_branch": "main"}}
             self.fail(f"unexpected API request: {url}")
 
         with patch.object(render, "get", side_effect=get):
@@ -232,7 +237,10 @@ class ForkRenderingTests(unittest.TestCase):
                     "owner": {"login": "vectorize-io"}, "default_branch": "main"}),
                 repo("brushgraft_enhance", fork=True, default_branch="main", parent={
                     "private": False, "full_name": "zeroherolin/brushgraft",
-                    "owner": {"login": "zeroherolin"}, "default_branch": "main"})
+                    "owner": {"login": "zeroherolin"}, "default_branch": "main"}),
+                repo("rea_linzzzzj", fork=True, default_branch="main", parent={
+                    "private": False, "full_name": "morluto/rea",
+                    "owner": {"login": "morluto"}, "default_branch": "main"})
             ])
         self.assertIn('href="https://github.com/LinZzzzJ/openGym_FitTrack"', readme)
         self.assertIn("openGym_FitTrack, a fork of DuarteSantos8/openGym", readme)
@@ -240,8 +248,11 @@ class ForkRenderingTests(unittest.TestCase):
         self.assertIn("hindsight_linzzzzj, a fork of vectorize-io/hindsight", readme)
         self.assertIn('href="https://github.com/LinZzzzJ/brushgraft_enhance"', readme)
         self.assertIn("brushgraft_enhance, a fork of zeroherolin/brushgraft", readme)
+        self.assertIn('href="https://github.com/LinZzzzJ/rea_linzzzzj"', readme)
+        self.assertIn("rea_linzzzzj, a fork of morluto/rea", readme)
         self.assertIn("AI AGENTS", outputs["forks/_ai-agents-light.svg"])
-        self.assertIn(">2</text>", outputs["forks/_ai-agents-light.svg"])
+        self.assertIn(">3</text>", outputs["forks/_ai-agents-light.svg"])
+        self.assertIn("up to date with upstream", outputs["forks/rea_linzzzzj-light.svg"])
         self.assertIn("up to date with upstream", outputs["forks/hindsight_linzzzzj-light.svg"])
         self.assertIn("VIBECODING APP", outputs["forks/_vibecoding-app-light.svg"])
         self.assertIn(">2</text>", outputs["forks/_vibecoding-app-light.svg"])
