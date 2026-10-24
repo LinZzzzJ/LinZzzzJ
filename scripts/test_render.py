@@ -62,7 +62,7 @@ class ProfileRenderingTests(unittest.TestCase):
         self.assertNotIn('width="25%"', readme)
         self.assertIn("COMMITS BEHIND", outputs["section-forks-light.svg"])
         self.assertNotIn("forks/blank.svg", outputs)
-        self.assertNotIn("forks/_agent-light.svg", outputs)
+        self.assertNotIn("forks/_ai-agents-light.svg", outputs)
         self.assertEqual(readme.count("<pre>"), 1)
         self.assertNotIn("</a>\n</pre>", readme)
         for name, content in outputs.items():
@@ -160,7 +160,7 @@ class ForkRenderingTests(unittest.TestCase):
                 return self.metadata()
             self.fail(f"unexpected API request: {url}")
 
-        with patch.object(render, "get", side_effect=get):
+        with patch.object(render, "get", side_effect=get), patch.object(render, "warn"):
             outputs, readme = render.render([repo(), self.metadata()])
         references = set(re.findall(re.escape(render.IMAGES) + r'([^"\s<>]+\.svg)', readme))
         self.assertEqual(references, set(outputs) | set(render.SNAKES))
@@ -168,12 +168,12 @@ class ForkRenderingTests(unittest.TestCase):
         self.assertIn("dsh-purge, a fork of mmparko/dsh-purge", readme)
         self.assertNotIn("placeholder", readme)
         for theme in render.THEMES:
-            for filename in (f"forks/_agent-{theme}.svg", f"forks/dsh-purge-{theme}.svg",
+            for filename in (f"forks/_ai-agents-{theme}.svg", f"forks/dsh-purge-{theme}.svg",
                              f"section-forks-{theme}.svg"):
                 root = ET.fromstring(outputs[filename])
                 labels = [t.text for t in root.findall(".//{*}text")]
-                if "_agent" in filename:
-                    self.assertEqual(labels, ["AGENT", "1"])
+                if "forks/_" in filename:
+                    self.assertEqual(labels, ["AI AGENTS", "1"])
                 elif "section-" in filename:
                     self.assertEqual(labels[:2], ["FORKS", "1"])
                     self.assertRegex(labels[2], r"COMMITS BEHIND UPSTREAM · \d{4}-\d{2}-\d{2}")
@@ -181,7 +181,7 @@ class ForkRenderingTests(unittest.TestCase):
                     self.assertIn("up to date with upstream", outputs[filename])
             for filename, content in outputs.items():
                 ET.fromstring(content)
-        parsed = ForkGridParser(render.grid_html([(False, [("Agent", ["dsh-purge"])])], {}))
+        parsed = ForkGridParser(render.grid_html([(False, [("AI AGENTS", ["dsh-purge"])])], {}))
         self.assertEqual(len(parsed.images), 8)
         self.assertTrue(all(image["width"] == "25%" for image in parsed.images))
         self.assertEqual(sum(image["src"].endswith("blank.svg") for image in parsed.images), 6)
@@ -195,6 +195,35 @@ class ForkRenderingTests(unittest.TestCase):
         self.assertIn("missing", warnings)
         self.assertIn("gone", warnings)
         self.assertIn("Uncategorized", warnings)
+
+    def test_new_vibecoding_fork_is_in_its_category_and_agent_is_renamed(self):
+        def get(url):
+            if url.endswith("/FitTrack/languages"):
+                return {"Python": 10}
+            if "/compare/" in url:
+                return {"ahead_by": 0, "behind_by": 0}
+            if url.endswith("/dsh-purge"):
+                return self.metadata()
+            if url.endswith("/openGym_FitTrack"):
+                return {"name": "openGym_FitTrack", "private": False, "fork": True,
+                        "owner": {"login": render.USER}, "default_branch": "main",
+                        "parent": {"private": False, "full_name": "DuarteSantos8/openGym",
+                                   "owner": {"login": "DuarteSantos8"}, "default_branch": "main"}}
+            self.fail(f"unexpected API request: {url}")
+
+        with patch.object(render, "get", side_effect=get):
+            outputs, readme = render.render([repo(), self.metadata(), repo(
+                "openGym_FitTrack", fork=True, default_branch="main", parent={
+                    "private": False, "full_name": "DuarteSantos8/openGym",
+                    "owner": {"login": "DuarteSantos8"}, "default_branch": "main"})])
+        self.assertIn('href="https://github.com/LinZzzzJ/openGym_FitTrack"', readme)
+        self.assertIn("openGym_FitTrack, a fork of DuarteSantos8/openGym", readme)
+        self.assertIn("AI AGENTS", outputs["forks/_ai-agents-light.svg"])
+        self.assertIn("VIBECODING APP", outputs["forks/_vibecoding-app-light.svg"])
+        self.assertIn("up to date with upstream", outputs["forks/openGym_FitTrack-light.svg"])
+        self.assertNotIn("forks/_agent-light.svg", outputs)
+        references = set(re.findall(re.escape(render.IMAGES) + r'([^"\s<>]+\.svg)', readme))
+        self.assertEqual(references, set(outputs) | set(render.SNAKES))
 
     def test_four_column_blocks_and_row_major_categories(self):
         columns = [("Agent", ["a1", "a2"]), ("Hardware", ["h1"]),

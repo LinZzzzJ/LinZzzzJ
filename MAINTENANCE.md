@@ -30,9 +30,10 @@ research links or experimental information.
 
 The **Forks** section uses the reference project's display rules. `FORKS` maps
 category names to this account's fork repository names, in display order. The
-initial category is **Agent**, containing **dsh-purge**. Cards link to this
-account's forks; categories show their project counts. No repositories are copied
-from the reference account's configuration.
+**AI AGENTS** category contains **dsh-purge**; **VIBECODING APP** contains
+**openGym_FitTrack**. Cards link to this account's forks; categories show their
+project counts. No repositories are copied from the reference account's
+configuration.
 
 Each category occupies one of four columns and lists its forks vertically. Empty
 categories are hidden; configured repositories no longer present as public forks

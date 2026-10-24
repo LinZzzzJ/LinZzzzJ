@@ -77,8 +77,10 @@ test('atomic Git publication preserves main and old assets on failure; identical
     git(['config', 'user.name', 'Fixture']); git(['config', 'user.email', 'fixture@example.invalid']);
     const assets = [...SNAKE_ASSETS, 'name-light.svg', 'name-dark.svg',
       'projects/FitTrack-light.svg', 'projects/FitTrack-dark.svg',
-      'forks/_agent-light.svg', 'forks/_agent-dark.svg',
+      'forks/_ai-agents-light.svg', 'forks/_ai-agents-dark.svg',
+      'forks/_vibecoding-app-light.svg', 'forks/_vibecoding-app-dark.svg',
       'forks/dsh-purge-light.svg', 'forks/dsh-purge-dark.svg', 'forks/blank.svg'];
+    assets.push('forks/openGym_FitTrack-light.svg', 'forks/openGym_FitTrack-dark.svg');
     const readme = 'Generated profile.\n' + assets.map(file =>
       `<img src="https://raw.githubusercontent.com/LinZzzzJ/LinZzzzJ/output/assets/${file}">`).join('\n');
     await writeFile(join(work, 'README.md'), readme);
