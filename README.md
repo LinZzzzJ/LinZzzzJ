@@ -33,7 +33,7 @@ href="https://github.com/LinZzzzJ/FitTrack"><picture><source media="(prefers-col
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/LinZzzzJ/LinZzzzJ/output/assets/section-languages-dark.svg"><img src="https://raw.githubusercontent.com/LinZzzzJ/LinZzzzJ/output/assets/section-languages-light.svg" width="100%" align="top" alt="Languages"></picture>
 
-<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/LinZzzzJ/LinZzzzJ/output/assets/languages-dark.svg"><img src="https://raw.githubusercontent.com/LinZzzzJ/LinZzzzJ/output/assets/languages-light.svg" width="100%" align="top" alt="Languages by code size: Python, Svelte, CSS, TypeScript, HTML, PowerShell, JavaScript"></picture>
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/LinZzzzJ/LinZzzzJ/output/assets/languages-dark.svg"><img src="https://raw.githubusercontent.com/LinZzzzJ/LinZzzzJ/output/assets/languages-light.svg" width="100%" align="top" alt="Languages by code size: Python, Svelte, TypeScript, CSS, HTML, Java, PowerShell, Other"></picture>
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/LinZzzzJ/LinZzzzJ/output/assets/section-contributions-dark.svg"><img src="https://raw.githubusercontent.com/LinZzzzJ/LinZzzzJ/output/assets/section-contributions-light.svg" width="100%" align="top" alt="GitHub Contributions"></picture>
 
