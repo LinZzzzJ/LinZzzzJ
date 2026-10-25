@@ -1,32 +1,36 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="840" height="70" viewBox="0 0 840 70" role="img" aria-label="Languages">
 <title>Languages</title>
 <defs><style>.m{font-family:ui-monospace,SFMono-Regular,'SF Mono',Menlo,Consolas,'Liberation Mono',monospace}.s{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Noto Sans',Helvetica,Arial,sans-serif}</style></defs>
-<rect x="0.00" y="4" width="507.87" height="10" rx="2" fill="#3572A5"/>
-<rect x="510.87" y="4" width="209.58" height="10" rx="2" fill="#ff3e00"/>
-<rect x="723.45" y="4" width="61.03" height="10" rx="2" fill="#663399"/>
-<rect x="787.47" y="4" width="22.42" height="10" rx="2" fill="#3178c6"/>
-<rect x="812.89" y="4" width="14.73" height="10" rx="2" fill="#e34c26"/>
-<rect x="830.61" y="4" width="6.26" height="10" rx="2" fill="#8c959f"/>
-<rect x="839.87" y="4" width="0.13" height="10" rx="2" fill="#f1e05a"/>
+<rect x="0.00" y="4" width="434.28" height="10" rx="2" fill="#3572A5"/>
+<rect x="437.28" y="4" width="183.71" height="10" rx="2" fill="#ff3e00"/>
+<rect x="623.98" y="4" width="119.21" height="10" rx="2" fill="#3178c6"/>
+<rect x="746.19" y="4" width="49.85" height="10" rx="2" fill="#663399"/>
+<rect x="799.04" y="4" width="11.73" height="10" rx="2" fill="#e34c26"/>
+<rect x="813.77" y="4" width="10.65" height="10" rx="2" fill="#b07219"/>
+<rect x="827.42" y="4" width="5.05" height="10" rx="2" fill="#8c959f"/>
+<rect x="835.47" y="4" width="4.53" height="10" rx="2" fill="#8c959f"/>
 <rect x="0.0" y="31.0" width="10" height="10" rx="2" fill="#3572A5" stroke="#1f2328" stroke-opacity=".12"/>
 <text class="m" x="18.0" y="40.0" font-size="12" fill="#1f2328">Python</text>
-<text class="m" x="182.0" y="40.0" font-size="12" fill="#59636e" text-anchor="end">61.8%</text>
+<text class="m" x="182.0" y="40.0" font-size="12" fill="#59636e" text-anchor="end">53.0%</text>
 <rect x="210.0" y="31.0" width="10" height="10" rx="2" fill="#ff3e00" stroke="#1f2328" stroke-opacity=".12"/>
 <text class="m" x="228.0" y="40.0" font-size="12" fill="#1f2328">Svelte</text>
-<text class="m" x="392.0" y="40.0" font-size="12" fill="#59636e" text-anchor="end">25.5%</text>
-<rect x="420.0" y="31.0" width="10" height="10" rx="2" fill="#663399" stroke="#1f2328" stroke-opacity=".12"/>
-<text class="m" x="438.0" y="40.0" font-size="12" fill="#1f2328">CSS</text>
-<text class="m" x="602.0" y="40.0" font-size="12" fill="#59636e" text-anchor="end">7.4%</text>
-<rect x="630.0" y="31.0" width="10" height="10" rx="2" fill="#3178c6" stroke="#1f2328" stroke-opacity=".12"/>
-<text class="m" x="648.0" y="40.0" font-size="12" fill="#1f2328">TypeScript</text>
-<text class="m" x="812.0" y="40.0" font-size="12" fill="#59636e" text-anchor="end">2.7%</text>
+<text class="m" x="392.0" y="40.0" font-size="12" fill="#59636e" text-anchor="end">22.4%</text>
+<rect x="420.0" y="31.0" width="10" height="10" rx="2" fill="#3178c6" stroke="#1f2328" stroke-opacity=".12"/>
+<text class="m" x="438.0" y="40.0" font-size="12" fill="#1f2328">TypeScript</text>
+<text class="m" x="602.0" y="40.0" font-size="12" fill="#59636e" text-anchor="end">14.6%</text>
+<rect x="630.0" y="31.0" width="10" height="10" rx="2" fill="#663399" stroke="#1f2328" stroke-opacity=".12"/>
+<text class="m" x="648.0" y="40.0" font-size="12" fill="#1f2328">CSS</text>
+<text class="m" x="812.0" y="40.0" font-size="12" fill="#59636e" text-anchor="end">6.1%</text>
 <rect x="0.0" y="55.0" width="10" height="10" rx="2" fill="#e34c26" stroke="#1f2328" stroke-opacity=".12"/>
 <text class="m" x="18.0" y="64.0" font-size="12" fill="#1f2328">HTML</text>
-<text class="m" x="182.0" y="64.0" font-size="12" fill="#59636e" text-anchor="end">1.8%</text>
-<rect x="210.0" y="55.0" width="10" height="10" rx="2" fill="#8c959f" stroke="#1f2328" stroke-opacity=".12"/>
-<text class="m" x="228.0" y="64.0" font-size="12" fill="#1f2328">PowerShell</text>
-<text class="m" x="392.0" y="64.0" font-size="12" fill="#59636e" text-anchor="end">0.8%</text>
-<rect x="420.0" y="55.0" width="10" height="10" rx="2" fill="#f1e05a" stroke="#1f2328" stroke-opacity=".12"/>
-<text class="m" x="438.0" y="64.0" font-size="12" fill="#1f2328">JavaScript</text>
-<text class="m" x="602.0" y="64.0" font-size="12" fill="#59636e" text-anchor="end">0.0%</text>
+<text class="m" x="182.0" y="64.0" font-size="12" fill="#59636e" text-anchor="end">1.4%</text>
+<rect x="210.0" y="55.0" width="10" height="10" rx="2" fill="#b07219" stroke="#1f2328" stroke-opacity=".12"/>
+<text class="m" x="228.0" y="64.0" font-size="12" fill="#1f2328">Java</text>
+<text class="m" x="392.0" y="64.0" font-size="12" fill="#59636e" text-anchor="end">1.3%</text>
+<rect x="420.0" y="55.0" width="10" height="10" rx="2" fill="#8c959f" stroke="#1f2328" stroke-opacity=".12"/>
+<text class="m" x="438.0" y="64.0" font-size="12" fill="#1f2328">PowerShell</text>
+<text class="m" x="602.0" y="64.0" font-size="12" fill="#59636e" text-anchor="end">0.6%</text>
+<rect x="630.0" y="55.0" width="10" height="10" rx="2" fill="#8c959f" stroke="#1f2328" stroke-opacity=".12"/>
+<text class="m" x="648.0" y="64.0" font-size="12" fill="#1f2328">Other</text>
+<text class="m" x="812.0" y="64.0" font-size="12" fill="#59636e" text-anchor="end">0.6%</text>
 </svg>
