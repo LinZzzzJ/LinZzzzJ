@@ -26,7 +26,8 @@ The name is **LinZzzzJ**. The introduction is **Think Deep. Automate the Rest.**
 The skills rows retain the existing languages, SQLite, hardware platforms and
 workflow tools, remove PowerShell, Svelte, FastAPI, ECharts, HDF5 and Windows, and
 add PI/SI simulation, high-speed signals, PCIe, USB and MIPI. Do not add private
-research links or experimental information.
+research links or experimental information. The selected public projects are
+**FitTrack** and **signal-weekly**; the profile repository itself stays excluded.
 
 The **Forks** section uses the reference project's display rules. `FORKS` maps
 category names to this account's fork repository names, in display order. The

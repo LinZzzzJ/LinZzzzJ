@@ -22,8 +22,17 @@ def repo(name="FitTrack", **overrides):
 class ProfileRenderingTests(unittest.TestCase):
     def test_public_projects_exclude_forks_profile_private_and_other_owners(self):
         repos = [repo(), repo(render.USER), repo("Fork", fork=True),
-                 repo("Private", private=True), repo("Other", owner={"login": "other"})]
-        self.assertEqual(list(render.public_projects(repos)), ["FitTrack"])
+                 repo("signal-weekly"), repo("Private", private=True),
+                 repo("Other", owner={"login": "other"})]
+        self.assertEqual(list(render.public_projects(repos)), ["FitTrack", "signal-weekly"])
+
+    def test_profile_repository_never_appears_in_project_cards(self):
+        with patch.object(render, "get", return_value={"Python": 1}), patch.object(render, "warn"):
+            outputs, readme = render.render([repo(), repo("signal-weekly", language="TypeScript")])
+        self.assertIn("projects/FitTrack-light.svg", outputs)
+        self.assertIn("projects/signal-weekly-light.svg", outputs)
+        self.assertNotIn("projects/LinZzzzJ", readme)
+        self.assertNotIn('href="https://github.com/LinZzzzJ/LinZzzzJ"', readme)
 
     def test_public_repo_pagination_and_private_metadata_guard(self):
         with patch.object(render, "get", side_effect=[[repo()] * 100, [repo("Second")]]) as get:
@@ -47,7 +56,7 @@ class ProfileRenderingTests(unittest.TestCase):
     def test_generated_readme_references_complete_themed_svg_set(self):
         with patch.object(render, "get", return_value={"Python": 3, "Svelte": 1}), \
              patch.object(render, "warn"):
-            outputs, readme = render.render([repo()])
+            outputs, readme = render.render([repo(), repo("signal-weekly", language="TypeScript")])
         references = set(re.findall(re.escape(render.IMAGES) + r'([^"\s<>]+\.svg)', readme))
         self.assertEqual(references, set(outputs) | set(render.SNAKES))
         self.assertEqual(readme.count(render.MOTTO), 1)
@@ -55,6 +64,7 @@ class ProfileRenderingTests(unittest.TestCase):
         self.assertIn(f'>{render.NAME}</text>', outputs["name-light.svg"])
         self.assertIn(f'>{render.NAME}</text>', outputs["name-dark.svg"])
         self.assertIn(f"https://github.com/{render.USER}/FitTrack", readme)
+        self.assertIn(f"https://github.com/{render.USER}/signal-weekly", readme)
         self.assertNotIn("zeroherolin", readme)
         self.assertNotIn("stats-", readme)
         self.assertNotIn("mailto:", readme)
@@ -120,7 +130,7 @@ class ProfileRenderingTests(unittest.TestCase):
             (dist / "assets.json").write_text('["previous.svg"]')
             error = urllib.error.URLError("fixture unavailable")
             with patch.object(render, "README", readme), patch.object(render, "BUILD", dist), \
-                 patch.object(render, "owned_repos", return_value=[repo()]), \
+                 patch.object(render, "owned_repos", return_value=[repo(), repo("signal-weekly")]), \
                  patch.object(render, "get", side_effect=error):
                 with self.assertRaises(urllib.error.URLError):
                     render.main()
@@ -152,7 +162,7 @@ class ForkRenderingTests(unittest.TestCase):
 
     def test_agent_fork_link_count_themes_and_complete_image_references(self):
         def get(url):
-            if url.endswith("/FitTrack/languages"):
+            if url.endswith("/FitTrack/languages") or url.endswith("/signal-weekly/languages"):
                 return {"Python": 10}
             if "/compare/" in url:
                 return {"ahead_by": 0, "behind_by": 99}
@@ -161,7 +171,7 @@ class ForkRenderingTests(unittest.TestCase):
             self.fail(f"unexpected API request: {url}")
 
         with patch.object(render, "get", side_effect=get), patch.object(render, "warn"):
-            outputs, readme = render.render([repo(), self.metadata()])
+            outputs, readme = render.render([repo(), repo("signal-weekly"), self.metadata()])
         references = set(re.findall(re.escape(render.IMAGES) + r'([^"\s<>]+\.svg)', readme))
         self.assertEqual(references, set(outputs) | set(render.SNAKES))
         self.assertEqual(readme.count('href="https://github.com/LinZzzzJ/dsh-purge"'), 1)
@@ -198,7 +208,7 @@ class ForkRenderingTests(unittest.TestCase):
 
     def test_new_forks_are_grouped_by_category_and_agent_is_renamed(self):
         def get(url):
-            if url.endswith("/FitTrack/languages"):
+            if url.endswith("/FitTrack/languages") or url.endswith("/signal-weekly/languages"):
                 return {"Python": 10}
             if "/compare/" in url:
                 return {"ahead_by": 0, "behind_by": 0}
@@ -228,7 +238,7 @@ class ForkRenderingTests(unittest.TestCase):
 
         with patch.object(render, "get", side_effect=get):
             outputs, readme = render.render([
-                repo(), self.metadata(),
+                repo(), repo("signal-weekly"), self.metadata(),
                 repo("openGym_FitTrack", fork=True, default_branch="main", parent={
                     "private": False, "full_name": "DuarteSantos8/openGym",
                     "owner": {"login": "DuarteSantos8"}, "default_branch": "main"}),
@@ -280,7 +290,7 @@ class ForkRenderingTests(unittest.TestCase):
 
     def test_no_unused_padding_asset_for_full_grid_and_private_forks_excluded(self):
         config = [(f"Category{i}", [f"fork{i}"]) for i in range(4)]
-        owned = [repo()] + [repo(f"fork{i}", fork=True) for i in range(4)]
+        owned = [repo(), repo("signal-weekly")] + [repo(f"fork{i}", fork=True) for i in range(4)]
         owned += [repo("private-fork", fork=True, private=True),
                   repo("other-fork", fork=True, owner={"login": "other"})]
         with patch.object(render, "FORKS", config), \
@@ -323,7 +333,7 @@ class ForkRenderingTests(unittest.TestCase):
         with patch.object(render, "FORKS", [("Agent", ["dsh-purge", "second"])]), \
              patch.object(render, "language_shares", return_value=[]), \
              patch.object(render, "fork_status", side_effect=lambda name: (None, None) if name == "dsh-purge" else ("upstream/second", 0)):
-            outputs, readme = render.render([repo(), repo("dsh-purge", fork=True), repo("second", fork=True)])
+            outputs, readme = render.render([repo(), repo("signal-weekly"), repo("dsh-purge", fork=True), repo("second", fork=True)])
         self.assertIn("sync status unavailable", outputs["forks/dsh-purge-light.svg"])
         self.assertIn("up to date with upstream", outputs["forks/second-light.svg"])
         self.assertIn('href="https://github.com/LinZzzzJ/dsh-purge"', readme)

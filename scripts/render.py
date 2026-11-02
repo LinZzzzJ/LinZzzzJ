@@ -40,6 +40,8 @@ SANS = "-apple-system,BlinkMacSystemFont,'Segoe UI','Noto Sans',Helvetica,Arial,
 PROJECTS = [
     ("FitTrack", "App",
      "Local-first fitness logs with AI assistance and trend analysis."),
+    ("signal-weekly", "Web",
+     "Chinese weekly digest of GitHub trending projects and technology news."),
 ]
 
 # Each category is a column; four categories form a block. Learning and
